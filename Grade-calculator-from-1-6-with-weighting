@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notenrechner</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280}
+    body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#111}
+    .app{max-width:980px;margin:28px auto;padding:20px}
+    h1{margin:0 0 12px;font-size:20px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .btn{background:#111;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
+    .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
+    .subject-list{display:flex;flex-direction:column;gap:10px}
+    .subject{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+    .dot{width:18px;height:18px;border-radius:6px}
+    .meta{display:flex;flex-direction:column}
+    .meta .name{font-weight:600}
+    .meta .avg{font-size:13px;color:var(--muted)}
+    .controls{display:flex;gap:8px;align-items:center}
+
+    .card-title{font-weight:700;margin-bottom:8px}
+    .field{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    label{min-width:90px;color:var(--muted);font-size:14px}
+    input[type="text"],select,input[type="number"]{padding:8px;border-radius:8px;border:1px solid #e6e6f0;min-width:120px}
+    .small{font-size:13px;color:var(--muted)}
+
+    .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .grade-row{display:flex;gap:8px;align-items:center}
+    .grade-row input{width:100px}
+    .grade-row select{width:120px}
+    .icon-btn{background:transparent;border:0;cursor:pointer;font-size:16px}
+
+    .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
+
+    /* modal */
+    .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center}
+    .modal{background:#fff;padding:16px;border-radius:12px;width:420px}
+    .row{display:flex;justify-content:space-between;gap:8px}
+    footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    th{background:#f0f0f0}
+
+    @media (max-width:720px){.layout{grid-template-columns:1fr} .top{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <h1>Notenrechner</h1>
+      <div class="controls">
+        <button class="btn" id="btn-add">Fach hinzufügen</button>
+        <button class="btn ghost" id="btn-overall">Gesamtnotendurchschnitt</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="panel" id="left">
+        <div class="card-title">Fächer</div>
+        <div id="subjects" class="subject-list"></div>
+        <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
+      </div>
+
+      <div class="panel" id="right">
+        <div id="welcome">
+          <div class="card-title">Wähle ein Fach</div>
+        </div>
+
+        <div id="subject-view" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div id="sub-name" style="font-size:18px;font-weight:700"></div>
+              <div id="sub-avg" class="small" style="margin-top:4px"></div>
+            </div>
+            <div>
+              <button class="btn ghost" id="btn-edit-sub">Bearbeiten</button>
+              <button class="btn" id="btn-back">Zurück</button>
+            </div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
+
+          <div>
+            <div class="card-title">Noten</div>
+            <div class="grade-rows" id="grade-rows"></div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn ghost" id="btn-add-grade">Note hinzufügen</button>
+            </div>
+            <div style="margin-top:12px;font-weight:700">Durchschnitt: <span id="calc-result">–</span></div>
+          </div>
+        </div>
+
+        <div id="overall-view" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="card-title">Gesamtnotendurchschnitt</div>
+            <div><button class="btn" id="btn-overall-back">Zurück</button></div>
+          </div>
+          <table id="overall-table">
+            <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <template id="modal-tpl">
+    <div class="modal-back">
+      <div class="modal">
+        <div class="card-title" id="modal-title">Titel</div>
+        <div style="margin-top:8px">
+          <div class="field"><label>Name</label><input id="modal-name" /></div>
+          <div class="field"><label>Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
+        </div>
+        <footer>
+          <button class="btn ghost" id="modal-cancel">Abbrechen</button>
+          <button class="btn" id="modal-save">Speichern</button>
+        </footer>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const STORAGE_KEY = 'noten_faecher_v1'
+    function load(){ try{const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): []}catch(e){return []} }
+    function save(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)) }
+
+    let subjects = load()
+    let currentId = null
+
+    function formatAvg(a){ if(a==null) return '—'; return a.toFixed(1).replace('.',',') }
+
+    function renderSubjects(){
+      const container = document.getElementById('subjects')
+      container.innerHTML=''
+      if(subjects.length===0){ document.getElementById('empty-msg').style.display='block' } else { document.getElementById('empty-msg').style.display='none' }
+      subjects.forEach(s=>{
+        const el = document.createElement('div')
+        el.className='subject'
+        el.innerHTML = `
+          <div class="dot" style="background:${s.color}"></div>
+          <div style="flex:1">
+            <div class="meta"><div class="name">${escapeHtml(s.name)}</div><div class="avg">${s.avg==null? '–' : formatAvg(s.avg)}</div></div>
+          </div>
+          <div class="controls">
+            <button class="icon-btn" title="Bearbeiten" data-id="${s.id}" data-action="edit">✏️</button>
+            <button class="icon-btn" title="Löschen" data-id="${s.id}" data-action="del">🗑️</button>
+          </div>
+        `
+        el.addEventListener('click',(e)=>{
+          const action = e.target.getAttribute('data-action')
+          const id = e.target.getAttribute('data-id')
+          if(action==='edit'){ openEditModal(id); e.stopPropagation(); return }
+          if(action==='del'){ if(confirm('Fach wirklich löschen?')){ removeSubject(id) }; e.stopPropagation(); return }
+          openSubject(s.id)
+        })
+        container.appendChild(el)
+      })
+    }
+
+    function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+    function addSubject(name,color){
+      const s = {id:'s'+Date.now(),name:name||'Neues Fach',color:color||'#4f46e5',grades:[],avg:null}
+      subjects.unshift(s); save(subjects); renderSubjects(); openSubject(s.id)
+    }
+    function updateSubject(id,data){
+      const i = subjects.findIndex(x=>x.id===id); if(i===-1) return
+      subjects[i] = {...subjects[i],...data}; save(subjects); renderSubjects(); if(currentId===id) showSubject(subjects[i])
+    }
+    function removeSubject(id){ subjects = subjects.filter(x=>x.id!==id); save(subjects); renderSubjects(); if(currentId===id){ closeSubject() } }
+
+    function openModal(title,name='',color='#4f46e5',onSave){
+      const tpl = document.getElementById('modal-tpl').content.cloneNode(true)
+      const back = tpl.querySelector('.modal-back')
+      back.querySelector('#modal-title').textContent = title
+      const nameIn = back.querySelector('#modal-name')
+      const colorIn = back.querySelector('#modal-color')
+      nameIn.value = name
+      colorIn.value = color
+      back.querySelector('#modal-cancel').addEventListener('click',()=>{ back.remove() })
+      back.querySelector('#modal-save').addEventListener('click',()=>{ onSave(nameIn.value.trim()||'Unbenannt',colorIn.value); back.remove() })
+      document.body.appendChild(back)
+    }
+
+    function openEditModal(id){ const s=subjects.find(x=>x.id===id); if(!s) return; openModal('Fach bearbeiten',s.name,s.color,(name,color)=>{updateSubject(id,{name,color})}) }
+
+    function openSubject(id){
+      const s=subjects.find(x=>x.id===id); if(!s) return; currentId=id;
+      document.getElementById('welcome').style.display='none';
+      document.getElementById('overall-view').style.display='none';
+      document.getElementById('subject-view').style.display='block';
+      showSubject(s)
+    }
+    function showSubject(s){
+      document.getElementById('sub-name').textContent=s.name
+      document.getElementById('sub-name').style.color=s.color
+      document.getElementById('sub-avg').textContent='Durchschnitt: '+(s.avg==null?'–':formatAvg(s.avg))
+      document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
+      renderGradeRows(s)
+      renderSubjects()
+    }
+    function closeSubject(){ currentId=null; document.getElementById('subject-view').style.display='none'; document.getElementById('welcome').style.display='block' }
+
+    function renderGradeRows(s){
+      const container=document.getElementById('grade-rows'); container.innerHTML=''
+      if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">Keine Noten. Füge Noten hinzu.</div>'; return }
+      s.grades.forEach((g,idx)=>{
+        const row=document.createElement('div'); row.className='grade-row'
+        const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
+        inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
+        const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
+        sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
+        const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑️'; del.title='Notenzeile löschen'
+        del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
+        row.appendChild(inNum); row.appendChild(sel); row.appendChild(del)
+        container.appendChild(row)
+      })
+    }
+
+    function parseFloatOrNull(v){ v=String(v).replace(',','.'); const n=parseFloat(v); return isNaN(n)?null:n }
+
+    document.getElementById('btn-add').addEventListener('click',()=>{ openModal('Neues Fach','','#4f46e5',(name,color)=>{ addSubject(name,color) }) })
+    document.getElementById('btn-back').addEventListener('click',()=>{ closeSubject() })
+    document.getElementById('btn-edit-sub').addEventListener('click',()=>{ if(!currentId) return; openEditModal(currentId) })
+    document.getElementById('btn-add-grade').addEventListener('click',()=>{ if(!currentId) return; const s=subjects.find(x=>x.id===currentId); s.grades.push({value:null,weight:1}); updateAvgForSubject(s) })
+    document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
+    document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
+
+    function calcAverage(grades){
+      if(!grades||grades.length===0) return null
+      let num=0,den=0
+      for(const g of grades){ const val=parseFloatOrNull(g.value); const w=parseFloat(g.weight)||0; if(val==null) continue; if(val<1||val>6) continue; num+=val*w; den+=w }
+      if(den===0) return null
+      return Math.round((num/den)*10)/10
+    }
+
+    function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
+
+    function openOverallView(){
+      document.getElementById('welcome').style.display='none';
+      document.getElementById('subject-view').style.display='none';
+      document.getElementById('overall-view').style.display='block';
+      const tbody=document.querySelector('#overall-table tbody'); tbody.innerHTML=''
+      let total=0,count=0
+      subjects.forEach(s=>{
+        const tr=document.createElement('tr')
+        tr.innerHTML=`<td>${escapeHtml(s.name)}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
+        tbody.appendChild(tr)
+        if(s.avg!=null){ total+=s.avg; count++ }
+      })
+      const overall=(count>0? (total/count):null)
+      document.getElementById('overall-avg').textContent=(overall==null?'–':formatAvg(overall))
+    }
+
+    window.addEventListener('beforeunload',()=>{ save(subjects) })
+
+    renderSubjects()
+  </script>
+</body>
+</html>
