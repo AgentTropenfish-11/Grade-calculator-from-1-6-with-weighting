@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Notenrechner</title>
+  <title>Grade Calculator</title>
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280}
     body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#111}
@@ -52,23 +52,23 @@
 <body>
   <div class="app">
     <div class="top">
-      <h1>Notenrechner</h1>
+      <h1>Grade Calculator</h1>
       <div class="controls">
-        <button class="btn" id="btn-add">Fach hinzufügen</button>
-        <button class="btn ghost" id="btn-overall">Gesamtnotendurchschnitt</button>
+        <button class="btn" id="btn-add">Add Subject</button>
+        <button class="btn ghost" id="btn-overall">Overall Average</button>
       </div>
     </div>
 
     <div class="layout">
       <div class="panel" id="left">
-        <div class="card-title">Fächer</div>
+        <div class="card-title">Subjects</div>
         <div id="subjects" class="subject-list"></div>
-        <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
+        <div id="empty-msg" class="empty" style="display:none">No subjects yet. Click "Add Subject".</div>
       </div>
 
       <div class="panel" id="right">
         <div id="welcome">
-          <div class="card-title">Wähle ein Fach</div>
+          <div class="card-title">Select a subject</div>
         </div>
 
         <div id="subject-view" style="display:none">
@@ -78,33 +78,33 @@
               <div id="sub-avg" class="small" style="margin-top:4px"></div>
             </div>
             <div>
-              <button class="btn ghost" id="btn-edit-sub">Bearbeiten</button>
-              <button class="btn" id="btn-back">Zurück</button>
+              <button class="btn ghost" id="btn-edit-sub">Edit</button>
+              <button class="btn" id="btn-back">Back</button>
             </div>
           </div>
 
           <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
 
           <div>
-            <div class="card-title">Noten</div>
+            <div class="card-title">Grades</div>
             <div class="grade-rows" id="grade-rows"></div>
             <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn ghost" id="btn-add-grade">Note hinzufügen</button>
+              <button class="btn ghost" id="btn-add-grade">Add Grade</button>
             </div>
-            <div style="margin-top:12px;font-weight:700">Durchschnitt: <span id="calc-result">–</span></div>
+            <div style="margin-top:12px;font-weight:700">Average: <span id="calc-result">–</span></div>
           </div>
         </div>
 
         <div id="overall-view" style="display:none">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="card-title">Gesamtnotendurchschnitt</div>
-            <div><button class="btn" id="btn-overall-back">Zurück</button></div>
+            <div class="card-title">Overall Average</div>
+            <div><button class="btn" id="btn-overall-back">Back</button></div>
           </div>
           <table id="overall-table">
-            <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
+            <thead><tr><th>Subject</th><th>Average</th></tr></thead>
             <tbody></tbody>
           </table>
-          <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
+          <div style="margin-top:12px;font-weight:700">Overall Average: <span id="overall-avg">–</span></div>
         </div>
       </div>
     </div>
@@ -114,14 +114,14 @@
   <template id="modal-tpl">
     <div class="modal-back">
       <div class="modal">
-        <div class="card-title" id="modal-title">Titel</div>
+        <div class="card-title" id="modal-title">Title</div>
         <div style="margin-top:8px">
           <div class="field"><label>Name</label><input id="modal-name" /></div>
-          <div class="field"><label>Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
+          <div class="field"><label>Color</label><input id="modal-color" type="color" value="#4f46e5"/></div>
         </div>
         <footer>
-          <button class="btn ghost" id="modal-cancel">Abbrechen</button>
-          <button class="btn" id="modal-save">Speichern</button>
+          <button class="btn ghost" id="modal-cancel">Cancel</button>
+          <button class="btn" id="modal-save">Save</button>
         </footer>
       </div>
     </div>
@@ -150,15 +150,15 @@
             <div class="meta"><div class="name">${escapeHtml(s.name)}</div><div class="avg">${s.avg==null? '–' : formatAvg(s.avg)}</div></div>
           </div>
           <div class="controls">
-            <button class="icon-btn" title="Bearbeiten" data-id="${s.id}" data-action="edit">✏️</button>
-            <button class="icon-btn" title="Löschen" data-id="${s.id}" data-action="del">🗑️</button>
+            <button class="icon-btn" title="Edit" data-id="${s.id}" data-action="edit">✏</button>
+            <button class="icon-btn" title="Delete" data-id="${s.id}" data-action="del">🗑</button>
           </div>
         `
         el.addEventListener('click',(e)=>{
           const action = e.target.getAttribute('data-action')
           const id = e.target.getAttribute('data-id')
           if(action==='edit'){ openEditModal(id); e.stopPropagation(); return }
-          if(action==='del'){ if(confirm('Fach wirklich löschen?')){ removeSubject(id) }; e.stopPropagation(); return }
+          if(action==='del'){ if(confirm('Really delete this subject?')){ removeSubject(id) }; e.stopPropagation(); return }
           openSubject(s.id)
         })
         container.appendChild(el)
@@ -168,7 +168,7 @@
     function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
     function addSubject(name,color){
-      const s = {id:'s'+Date.now(),name:name||'Neues Fach',color:color||'#4f46e5',grades:[],avg:null}
+      const s = {id:'s'+Date.now(),name:name||'New Subject',color:color||'#4f46e5',grades:[],avg:null}
       subjects.unshift(s); save(subjects); renderSubjects(); openSubject(s.id)
     }
     function updateSubject(id,data){
@@ -186,11 +186,11 @@
       nameIn.value = name
       colorIn.value = color
       back.querySelector('#modal-cancel').addEventListener('click',()=>{ back.remove() })
-      back.querySelector('#modal-save').addEventListener('click',()=>{ onSave(nameIn.value.trim()||'Unbenannt',colorIn.value); back.remove() })
+      back.querySelector('#modal-save').addEventListener('click',()=>{ onSave(nameIn.value.trim()||'Untitled',colorIn.value); back.remove() })
       document.body.appendChild(back)
     }
 
-    function openEditModal(id){ const s=subjects.find(x=>x.id===id); if(!s) return; openModal('Fach bearbeiten',s.name,s.color,(name,color)=>{updateSubject(id,{name,color})}) }
+    function openEditModal(id){ const s=subjects.find(x=>x.id===id); if(!s) return; openModal('Edit Subject',s.name,s.color,(name,color)=>{updateSubject(id,{name,color})}) }
 
     function openSubject(id){
       const s=subjects.find(x=>x.id===id); if(!s) return; currentId=id;
@@ -202,7 +202,7 @@
     function showSubject(s){
       document.getElementById('sub-name').textContent=s.name
       document.getElementById('sub-name').style.color=s.color
-      document.getElementById('sub-avg').textContent='Durchschnitt: '+(s.avg==null?'–':formatAvg(s.avg))
+      document.getElementById('sub-avg').textContent='Average: '+(s.avg==null?'–':formatAvg(s.avg))
       document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
       renderGradeRows(s)
       renderSubjects()
@@ -211,14 +211,14 @@
 
     function renderGradeRows(s){
       const container=document.getElementById('grade-rows'); container.innerHTML=''
-      if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">Keine Noten. Füge Noten hinzu.</div>'; return }
+      if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">No grades. Add one.</div>'; return }
       s.grades.forEach((g,idx)=>{
         const row=document.createElement('div'); row.className='grade-row'
         const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
         inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
         const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
-        const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑️'; del.title='Notenzeile löschen'
+        const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑'; del.title='Delete grade row'
         del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
         row.appendChild(inNum); row.appendChild(sel); row.appendChild(del)
         container.appendChild(row)
@@ -227,7 +227,7 @@
 
     function parseFloatOrNull(v){ v=String(v).replace(',','.'); const n=parseFloat(v); return isNaN(n)?null:n }
 
-    document.getElementById('btn-add').addEventListener('click',()=>{ openModal('Neues Fach','','#4f46e5',(name,color)=>{ addSubject(name,color) }) })
+    document.getElementById('btn-add').addEventListener('click',()=>{ openModal('New Subject','','#4f46e5',(name,color)=>{ addSubject(name,color) }) })
     document.getElementById('btn-back').addEventListener('click',()=>{ closeSubject() })
     document.getElementById('btn-edit-sub').addEventListener('click',()=>{ if(!currentId) return; openEditModal(currentId) })
     document.getElementById('btn-add-grade').addEventListener('click',()=>{ if(!currentId) return; const s=subjects.find(x=>x.id===currentId); s.grades.push({value:null,weight:1}); updateAvgForSubject(s) })
@@ -252,7 +252,7 @@
       let total=0,count=0
       subjects.forEach(s=>{
         const tr=document.createElement('tr')
-        tr.innerHTML=`<td>${escapeHtml(s.name)}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
+        tr.innerHTML=<td>${escapeHtml(s.name)}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>
         tbody.appendChild(tr)
         if(s.avg!=null){ total+=s.avg; count++ }
       })
