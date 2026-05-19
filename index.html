@@ -11,8 +11,25 @@
     .main-content{flex:1}
     h1{margin:0 0 12px;font-size:20px}
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .btn{background:#111;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600}
-    .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
+    
+    /* Einheitliche Formatierung für Buttons UND Labels */
+    .btn, label.btn {
+      background:#111;
+      color:#fff;
+      padding:8px 12px;
+      border-radius:8px;
+      border:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:Inter,Segoe UI,Roboto,Arial;
+      font-size:14px;
+      font-weight:600;
+      box-sizing:border-box;
+    }
+    .btn.ghost, label.btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
+    
     .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
     .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
     
@@ -149,7 +166,7 @@
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Export
       </button>
-      <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center">
+      <label class="btn ghost" style="margin:0;">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         Import
         <input type="file" id="btn-import" accept=".txt" style="display:none"/>
