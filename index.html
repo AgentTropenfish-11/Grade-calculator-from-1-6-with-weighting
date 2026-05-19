@@ -7,7 +7,8 @@
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280}
     body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#111}
-    .app{max-width:980px;margin:28px auto;padding:20px}
+    .app{max-width:980px;margin:28px auto;padding:20px;display:flex;flex-direction:column;min-height:90vh}
+    .main-content{flex:1}
     h1{margin:0 0 12px;font-size:20px}
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     .btn{background:#111;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600}
@@ -43,6 +44,9 @@
 
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
 
+    /* Unten platzierte Steuerung für Export/Import */
+    .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-start;align-items:center}
+
     /* modal */
     .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center}
     .modal{background:#fff;padding:16px;border-radius:12px;width:420px}
@@ -56,94 +60,100 @@
       .layout{grid-template-columns:1fr} 
       .top{flex-direction:column;align-items:flex-start}
       .controls-top{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+      .bottom-controls{justify-content:center;margin-top:24px}
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="top">
-      <h1>Notenrechner</h1>
-      <div class="controls-top" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="btn-add">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Fach hinzufügen
-        </button>
-        <button class="btn ghost" id="btn-overall">
-          <svg viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
-          Gesamtnotendurchschnitt
-        </button>
-        <button class="btn ghost" id="btn-export">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Export
-        </button>
-        <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          Import
-          <input type="file" id="btn-import" accept=".txt" style="display:none"/>
-        </label>
+    <div class="main-content">
+      <div class="top">
+        <h1>Notenrechner</h1>
+        <div class="controls-top" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="btn-add">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Fach hinzufügen
+          </button>
+          <button class="btn ghost" id="btn-overall">
+            <svg viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+            Gesamtnotendurchschnitt
+          </button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="panel" id="left">
+          <div class="card-title">Fächer</div>
+          <div id="subjects" class="subject-list"></div>
+          <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
+        </div>
+
+        <div class="panel" id="right">
+          <div id="welcome">
+            <div class="card-title">Wähle ein Fach</div>
+          </div>
+
+          <div id="subject-view" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div id="sub-name" style="font-size:18px;font-weight:700"></div>
+                <div id="sub-avg" class="small" style="margin-top:4px"></div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn ghost" id="btn-edit-sub">
+                  <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  Bearbeiten
+                </button>
+                <button class="btn" id="btn-back">
+                  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  Zurück
+                </button>
+              </div>
+            </div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
+
+            <div>
+              <div class="card-title">Noten</div>
+              <div class="grade-rows" id="grade-rows"></div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn ghost" id="btn-add-grade">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Note hinzufügen
+                </button>
+              </div>
+              <div style="margin-top:12px;font-weight:700">Durchschnitt: <span id="calc-result">–</span></div>
+            </div>
+          </div>
+
+          <div id="overall-view" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="card-title">Gesamtnotendurchschnitt</div>
+              <div><button class="btn" id="btn-overall-back">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Zurück
+              </button></div>
+            </div>
+            <table id="overall-table">
+              <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="layout">
-      <div class="panel" id="left">
-        <div class="card-title">Fächer</div>
-        <div id="subjects" class="subject-list"></div>
-        <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
-      </div>
-
-      <div class="panel" id="right">
-        <div id="welcome">
-          <div class="card-title">Wähle ein Fach</div>
-        </div>
-
-        <div id="subject-view" style="display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div id="sub-name" style="font-size:18px;font-weight:700"></div>
-              <div id="sub-avg" class="small" style="margin-top:4px"></div>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn ghost" id="btn-edit-sub">
-                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                Bearbeiten
-              </button>
-              <button class="btn" id="btn-back">
-                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Zurück
-              </button>
-            </div>
-          </div>
-
-          <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
-
-          <div>
-            <div class="card-title">Noten</div>
-            <div class="grade-rows" id="grade-rows"></div>
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn ghost" id="btn-add-grade">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Note hinzufügen
-              </button>
-            </div>
-            <div style="margin-top:12px;font-weight:700">Durchschnitt: <span id="calc-result">–</span></div>
-          </div>
-        </div>
-
-        <div id="overall-view" style="display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="card-title">Gesamtnotendurchschnitt</div>
-            <div><button class="btn" id="btn-overall-back">
-              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              Zurück
-            </button></div>
-          </div>
-          <table id="overall-table">
-            <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
-            <tbody></tbody>
-          </table>
-          <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
-        </div>
-      </div>
+    <div class="bottom-controls">
+      <button class="btn ghost" id="btn-export">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Export
+      </button>
+      <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        Import
+        <input type="file" id="btn-import" accept=".txt" style="display:none"/>
+      </label>
     </div>
   </div>
 
@@ -171,7 +181,8 @@
     let subjects = load()
     let currentId = null
 
-    function formatAvg(a){ if(a==null) return '—'; return a.toFixed(1).replace('.',',') }
+    // Rundung auf zwei Nachkommastellen
+    function formatAvg(a){ if(a==null) return '—'; return a.toFixed(2).replace('.',',') }
 
     const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -286,12 +297,13 @@
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
+    // Berechnung auf zwei Nachkommastellen gerundet
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
       for(const g of grades){ const val=parseFloatOrNull(g.value); const w=parseFloat(g.weight)||0; if(val==null) continue; if(val<1||val>6) continue; num+=val*w; den+=w }
       if(den===0) return null
-      return Math.round((num/den)*10)/10
+      return Math.round((num/den)*100)/100
     }
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
