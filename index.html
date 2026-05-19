@@ -5,48 +5,74 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Grade Calculator</title>
   <style>
-    :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280}
-    body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#111}
+    :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280;--text-primary:#111;--border-color:#e6e6f0;--accent:#111}
+    body{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text-primary);-webkit-font-smoothing:antialiased}
     .app{max-width:980px;margin:28px auto;padding:20px}
-    h1{margin:0 0 12px;font-size:20px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .btn{background:#111;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
-    .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
-    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
-    .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
-    .subject-list{display:flex;flex-direction:column;gap:10px}
-    .subject{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
-    .dot{width:18px;height:18px;border-radius:6px}
-    .meta{display:flex;flex-direction:column}
-    .meta .name{font-weight:600}
-    .meta .avg{font-size:13px;color:var(--muted)}
-    .controls{display:flex;gap:8px;align-items:center}
-
-    .card-title{font-weight:700;margin-bottom:8px}
-    .field{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-    label{min-width:90px;color:var(--muted);font-size:14px}
-    input[type="text"],select,input[type="number"]{padding:8px;border-radius:8px;border:1px solid #e6e6f0;min-width:120px}
+    h1{margin:0 0 12px;font-size:22px;font-weight:700}
+    
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    
+    .btn{background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:background 0.15s ease}
+    .btn:hover{background:#333}
+    .btn.ghost{background:transparent;color:var(--text-primary);border:1px solid #ddd}
+    .btn.ghost:hover{background:#fafafa;border-color:#ccc}
+    
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:24px;margin-top:24px}
+    
+    .panel{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,0.1),0 1px 2px rgba(16,24,40,0.06)}
+    
+    .card-title{font-weight:700;font-size:16px;margin-bottom:16px;color:var(--text-primary)}
+    
+    /* Subject List */
+    .subject-list{display:flex;flex-direction:column;gap:12px}
+    .subject{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all 0.15s ease}
+    .subject:hover{background:#f9fafb;border-color:#eee}
+    .subject.active{background:#f3f4f6;border-color:#e5e7eb}
+    
+    .dot{width:16px;height:16px;border-radius:6px;flex-shrink:0}
+    .meta{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .meta .name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta .avg{font-size:13px;color:var(--muted);margin-top:2px}
+    
+    .controls{display:flex;gap:4px;align-items:center;margin-left:auto}
+    
+    /* Forms & Fields */
+    .field{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    label{min-width:100px;color:var(--muted);font-size:14px;font-weight:500}
+    input[type="text"],select,input[type="number"]{padding:10px;border-radius:8px;border:1px solid var(--border-color);min-width:140px;font-size:14px;color:var(--text-primary)}
+    input[type="text"]:focus,select:focus,input[type="number"]:focus{outline:none;border-color:#a1a1aa;box-shadow:0 0 0 3px rgba(161,161,170,0.1)}
+    input[type="color"]{border:none;width:40px;height:40px;padding:0;background:none;cursor:pointer;border-radius:8px}
+    
     .small{font-size:13px;color:var(--muted)}
-
-    .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-    .grade-row{display:flex;gap:8px;align-items:center}
-    .grade-row input{width:100px}
-    .grade-row select{width:120px}
-    .icon-btn{background:transparent;border:0;cursor:pointer;font-size:16px}
-
-    .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
-
-    /* modal */
-    .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center}
-    .modal{background:#fff;padding:16px;border-radius:12px;width:420px}
-    .row{display:flex;justify-content:space-between;gap:8px}
-    footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{border:1px solid #ddd;padding:8px;text-align:left}
-    th{background:#f0f0f0}
-
-    @media (max-width:720px){.layout{grid-template-columns:1fr} .top{flex-direction:column;align-items:flex-start}}
+    hr{margin:20px 0;border:none;border-top:1px solid #eee}
+    
+    /* Grade Table */
+    .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .grade-row{display:flex;gap:12px;align-items:center}
+    .grade-row input{width:120px;flex:1}
+    .grade-row select{width:100px}
+    
+    /* Professional Icons */
+    .icon-btn{background:transparent;border:0;cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.15s ease}
+    .icon-btn:hover{background:#f3f4f6;color:var(--text-primary)}
+    .icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    
+    .btn svg, label.btn svg {width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+    
+    .empty{color:var(--muted);padding:32px 16px;border-radius:8px;text-align:center;border:2px dashed #e5e7eb;font-size:14px}
+    
+    /* Modal */
+    .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(2px)}
+    .modal{background:#fff;padding:24px;border-radius:12px;width:440px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04)}
+    
+    footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+    
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:16px;border:1px solid #eee;border-radius:8px}
+    th,td{padding:12px 16px;text-align:left;font-size:14px;border-bottom:1px solid #eee}
+    th{background:#f9fafb;font-weight:600;color:var(--muted)}
+    tr:last-child td{border-bottom:none}
+    
+    @media (max-width:768px){.layout{grid-template-columns:1fr} .top{flex-direction:column;align-items:flex-start} .controls{width:100%;justify-content:flex-start;flex-wrap:wrap}}
   </style>
 </head>
 <body>
@@ -54,90 +80,119 @@
     <div class="top">
       <h1>Grade Calculator</h1>
       <div class="controls">
-        <button class="btn" id="btn-add">Add Subject</button>
-        <button class="btn ghost" id="btn-overall">Overall GPA</button>
-        <button class="btn ghost" id="btn-export">Export</button>
-        <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;box-sizing:border-box;height:35px;vertical-align:middle">Import<input type="file" id="btn-import" accept=".txt" style="display:none"/></label>
+        <button class="btn" id="btn-add">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Subject
+        </button>
+        <button class="btn ghost" id="btn-overall">
+          <svg viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+          Overall GPA
+        </button>
+        <button class="btn ghost" id="btn-export">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export
+        </button>
+        <label class="btn ghost" style="cursor:pointer;margin:0;">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Import
+          <input type="file" id="btn-import" accept=".txt" style="display:none"/>
+        </label>
       </div>
     </div>
-
+    
     <div class="layout">
       <div class="panel" id="left">
         <div class="card-title">Subjects</div>
         <div id="subjects" class="subject-list"></div>
-        <div id="empty-msg" class="empty" style="display:none">No subjects yet. Click "Add Subject".</div>
+        <div id="empty-msg" class="empty" style="display:none">No subjects yet. Click "Add Subject" to begin.</div>
       </div>
-
+      
       <div class="panel" id="right">
-        <div id="welcome">
-          <div class="card-title">Select a Subject</div>
+        <div id="welcome" style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;color:var(--muted)">
+          <div class="card-title">Select a Subject from the left</div>
         </div>
-
+        
         <div id="subject-view" style="display:none">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
-              <div id="sub-name" style="font-size:18px;font-weight:700"></div>
-              <div id="sub-avg" class="small" style="margin-top:4px"></div>
+              <div id="sub-name" style="font-size:20px;font-weight:700"></div>
+              <div id="sub-avg" class="small" style="margin-top:6px"></div>
             </div>
-            <div>
-              <button class="btn ghost" id="btn-edit-sub">Edit</button>
-              <button class="btn" id="btn-back">Back</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn ghost" id="btn-edit-sub">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit
+              </button>
+              <button class="btn" id="btn-back">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Back
+              </button>
             </div>
           </div>
-
-          <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
-
+          
+          <hr />
+          
           <div>
             <div class="card-title">Grades</div>
             <div class="grade-rows" id="grade-rows"></div>
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn ghost" id="btn-add-grade">Add Grade</button>
+            <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+              <button class="btn ghost" id="btn-add-grade">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Grade Row
+              </button>
+              <div style="font-size:16px;font-weight:700">Average: <span id="calc-result" style="margin-left:8px;padding:4px 8px;background:#f3f4f6;border-radius:6px;font-variant-numeric: tabular-nums;">–</span></div>
             </div>
-            <div style="margin-top:12px;font-weight:700">Average: <span id="calc-result">–</span></div>
           </div>
         </div>
-
+        
         <div id="overall-view" style="display:none">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="card-title">Overall GPA Breakdown</div>
-            <div><button class="btn" id="btn-overall-back">Back</button></div>
+            <div class="card-title" style="margin-bottom:0">Overall GPA Breakdown</div>
+            <div><button class="btn" id="btn-overall-back">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back
+            </button></div>
           </div>
           <table id="overall-table">
             <thead><tr><th>Subject</th><th>Average</th></tr></thead>
             <tbody></tbody>
           </table>
-          <div style="margin-top:12px;font-weight:700">Overall Average: <span id="overall-avg">–</span></div>
+          <div style="margin-top:20px;font-weight:700;text-align:right;font-size:16px">Overall Average: <span id="overall-avg" style="margin-left:8px;padding:6px 12px;background:#f3f4f6;border-radius:8px;font-variant-numeric: tabular-nums;">–</span></div>
         </div>
       </div>
     </div>
   </div>
-
+  
   <template id="modal-tpl">
     <div class="modal-back">
       <div class="modal">
         <div class="card-title" id="modal-title">Title</div>
-        <div style="margin-top:8px">
-          <div class="field"><label>Name</label><input id="modal-name" /></div>
-          <div class="field"><label>Color</label><input id="modal-color" type="color" value="#4f46e5"/></div>
+        <div style="margin-top:16px">
+          <div class="field"><label>Subject Name</label><input id="modal-name" placeholder="e.g., Mathematics" /></div>
+          <div class="field"><label>Label Color</label><input id="modal-color" type="color" value="#111111"/></div>
         </div>
         <footer>
           <button class="btn ghost" id="modal-cancel">Cancel</button>
-          <button class="btn" id="modal-save">Save</button>
+          <button class="btn" id="modal-save">Save Subject</button>
         </footer>
       </div>
     </div>
   </template>
-
+  
   <script>
     const STORAGE_KEY = 'noten_faecher_v1'
     function load(){ try{const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): []}catch(e){return []} }
     function save(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)) }
-
+    
     let subjects = load()
     let currentId = null
-
+    
     function formatAvg(a){ if(a==null) return '—'; return a.toFixed(2) }
-
+    
+    // Minimal Black Stroke Icons
+    const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+    const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+    
     function renderSubjects(){
       const container = document.getElementById('subjects')
       container.innerHTML=''
@@ -145,31 +200,30 @@
       subjects.forEach(s=>{
         const el = document.createElement('div')
         el.className='subject'
+        if(s.id === currentId) el.classList.add('active');
         el.innerHTML = `
-          <div class="dot" style="background:${s.color}"></div>
-          <div style="flex:1">
-            <div class="meta"><div class="name">${escapeHtml(s.name)}</div><div class="avg">${s.avg==null? '–' : formatAvg(s.avg)}</div></div>
-          </div>
-          <div class="controls">
-            <button class="icon-btn" title="Edit" data-id="${s.id}" data-action="edit">✏️</button>
-            <button class="icon-btn" title="Delete" data-id="${s.id}" data-action="del">🗑️</button>
-          </div>
-        `
+<div class="dot" style="background:${s.color}"></div>
+<div style="flex:1; overflow:hidden">
+<div class="meta"><div class="name">${escapeHtml(s.name)}</div><div class="avg" style="font-variant-numeric: tabular-nums;">${s.avg==null? '–' : formatAvg(s.avg)}</div></div>
+</div>
+<div class="controls">
+<button class="icon-btn edit-trigger" title="Edit Subject Name" data-id="${s.id}">${iconEdit}</button>
+<button class="icon-btn del-trigger" title="Delete Subject" data-id="${s.id}">${iconDel}</button>
+</div>
+`
         el.addEventListener('click',(e)=>{
-          const action = e.target.getAttribute('data-action')
-          const id = e.target.getAttribute('data-id')
-          if(action==='edit'){ openEditModal(id); e.stopPropagation(); return }
-          if(action==='del'){ if(confirm('Are you sure you want to delete this subject?')){ removeSubject(id) }; e.stopPropagation(); return }
+          if(e.target.closest('.edit-trigger')){ openEditModal(s.id); e.stopPropagation(); return; }
+          if(e.target.closest('.del-trigger')){ if(confirm('Are you sure you want to delete this subject?')){ removeSubject(s.id) }; e.stopPropagation(); return; }
           openSubject(s.id)
         })
         container.appendChild(el)
       })
     }
-
+    
     function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-
+    
     function addSubject(name,color){
-      const s = {id:'s'+Date.now(),name:name||'New Subject',color:color||'#4f46e5',grades:[],avg:null}
+      const s = {id:'s'+Date.now(),name:name||'New Subject',color:color||'#111111',grades:[],avg:null}
       subjects.unshift(s); save(subjects); renderSubjects(); openSubject(s.id)
     }
     function updateSubject(id,data){
@@ -177,8 +231,8 @@
       subjects[i] = {...subjects[i],...data}; save(subjects); renderSubjects(); if(currentId===id) showSubject(subjects[i])
     }
     function removeSubject(id){ subjects = subjects.filter(x=>x.id!==id); save(subjects); renderSubjects(); if(currentId===id){ closeSubject() } }
-
-    function openModal(title,name='',color='#4f46e5',onSave){
+    
+    function openModal(title,name='',color='#111111',onSave){
       const tpl = document.getElementById('modal-tpl').content.cloneNode(true)
       const back = tpl.querySelector('.modal-back')
       back.querySelector('#modal-title').textContent = title
@@ -187,12 +241,12 @@
       nameIn.value = name
       colorIn.value = color
       back.querySelector('#modal-cancel').addEventListener('click',()=>{ back.remove() })
-      back.querySelector('#modal-save').addEventListener('click',()=>{ onSave(nameIn.value.trim()||'Untitled',colorIn.value); back.remove() })
+      back.querySelector('#modal-save').addEventListener('click',()=>{ onSave(nameIn.value.trim()||'Untitled Subject',colorIn.value); back.remove() })
       document.body.appendChild(back)
     }
-
+    
     function openEditModal(id){ const s=subjects.find(x=>x.id===id); if(!s) return; openModal('Edit Subject',s.name,s.color,(name,color)=>{updateSubject(id,{name,color})}) }
-
+    
     function openSubject(id){
       const s=subjects.find(x=>x.id===id); if(!s) return; currentId=id;
       document.getElementById('welcome').style.display='none';
@@ -206,35 +260,35 @@
       document.getElementById('sub-avg').textContent='Average: '+(s.avg==null?'–':formatAvg(s.avg))
       document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
       renderGradeRows(s)
-      renderSubjects()
+      renderSubjects() // to highlight active
     }
-    function closeSubject(){ currentId=null; document.getElementById('subject-view').style.display='none'; document.getElementById('welcome').style.display='block' }
-
+    function closeSubject(){ currentId=null; document.getElementById('subject-view').style.display='none'; document.getElementById('welcome').style.display='flex'; renderSubjects() }
+    
     function renderGradeRows(s){
       const container=document.getElementById('grade-rows'); container.innerHTML=''
-      if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">No grades yet. Add a grade row below.</div>'; return }
+      if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="empty" style="padding: 20px 16px;">No grades yet. Add a grade row below.</div>'; return }
       s.grades.forEach((g,idx)=>{
         const row=document.createElement('div'); row.className='grade-row'
-        const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.01'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
+        const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.01'; inNum.min='1'; inNum.max='6'; inNum.value=g.value; inNum.placeholder='Grade (1-6)'
         inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
         const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
-        const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑️'; del.title='Delete grade row'
+        const del=document.createElement('button'); del.className='icon-btn'; del.innerHTML=iconDel; del.title='Delete grade row'
         del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
         row.appendChild(inNum); row.appendChild(sel); row.appendChild(del)
         container.appendChild(row)
       })
     }
-
+    
     function parseFloatOrNull(v){ v=String(v).replace(',','.'); const n=parseFloat(v); return isNaN(n)?null:n }
-
-    document.getElementById('btn-add').addEventListener('click',()=>{ openModal('New Subject','','#4f46e5',(name,color)=>{ addSubject(name,color) }) })
+    
+    document.getElementById('btn-add').addEventListener('click',()=>{ openModal('New Subject','','#111111',(name,color)=>{ addSubject(name,color) }) })
     document.getElementById('btn-back').addEventListener('click',()=>{ closeSubject() })
     document.getElementById('btn-edit-sub').addEventListener('click',()=>{ if(!currentId) return; openEditModal(currentId) })
     document.getElementById('btn-add-grade').addEventListener('click',()=>{ if(!currentId) return; const s=subjects.find(x=>x.id===currentId); s.grades.push({value:null,weight:1}); updateAvgForSubject(s) })
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
-    document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
-
+    document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='flex' })
+    
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
@@ -242,9 +296,9 @@
       if(den===0) return null
       return Math.round((num/den)*100)/100
     }
-
+    
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
-
+    
     function openOverallView(){
       document.getElementById('welcome').style.display='none';
       document.getElementById('subject-view').style.display='none';
@@ -253,27 +307,27 @@
       let total=0,count=0
       subjects.forEach(s=>{
         const tr=document.createElement('tr')
-        tr.innerHTML=`<td>${escapeHtml(s.name)}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
+        tr.innerHTML=`<td>${escapeHtml(s.name)}</td><td style="font-variant-numeric: tabular-nums; width: 100px;">${s.avg==null?'–':formatAvg(s.avg)}</td>`
         tbody.appendChild(tr)
         if(s.avg!=null){ total+=s.avg; count++ }
       })
       const overall=(count>0? (total/count):null)
       document.getElementById('overall-avg').textContent=(overall==null?'–':formatAvg(overall))
     }
-
+    
     window.addEventListener('beforeunload',()=>{ save(subjects) })
-
-    // ── Export (Geändert: Reiner Fließtext ohne ASCII-Box-Grafiken) ──────────
+    
+    // ── Export (Pure Text) ──────────────────────────
     document.getElementById('btn-export').addEventListener('click',()=>{
       const now = new Date()
       const dateStr = now.toLocaleDateString('en-US',{day:'2-digit',month:'2-digit',year:'numeric'})
       const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
-
+      
       let txt = ''
       txt += 'GRADE CALCULATOR – REPORT CARD\n'
       txt += 'Exported on ' + dateStr + ' at ' + timeStr + '\n'
       txt += '========================================\n\n'
-
+      
       if(subjects.length === 0){
         txt += '(No subjects available)\n'
       } else {
@@ -295,7 +349,7 @@
           }
           txt += '\n'
         })
-
+        
         txt += '========================================\n'
         txt += 'OVERALL SUMMARY\n'
         txt += '========================================\n'
@@ -312,15 +366,15 @@
         txt += '--- JSON Data (Do not edit) ---\n'
         txt += JSON.stringify(subjects)
       }
-
+      
       const blob = new Blob([txt],{type:'text/plain;charset=utf-8'})
       const url  = URL.createObjectURL(blob)
       const a    = document.createElement('a'); a.href=url
       a.download = 'GradeReport_' + dateStr.replace(/\//g,'-') + '.txt'
       a.click(); URL.revokeObjectURL(url)
     })
-
-    // ── Import ──────────────────────────────────────────────────────────────
+    
+    // ── Import ──────────────────────────────────────
     document.getElementById('btn-import').addEventListener('change', e=>{
       const file = e.target.files[0]; if(!file) return
       const reader = new FileReader()
@@ -348,7 +402,7 @@
       }
       reader.readAsText(file)
     })
-
+    
     renderSubjects()
   </script>
 </body>
