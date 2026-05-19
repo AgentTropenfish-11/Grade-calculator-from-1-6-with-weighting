@@ -12,8 +12,8 @@
     h1{margin:0 0 12px;font-size:20px}
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     
-    /* Einheitliche Formatierung für Buttons UND Labels */
-    .btn, label.btn {
+    /* Einheitliche Formatierung für alle Buttons */
+    .btn {
       background:#111;
       color:#fff;
       padding:8px 12px;
@@ -28,7 +28,7 @@
       font-weight:600;
       box-sizing:border-box;
     }
-    .btn.ghost, label.btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
+    .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
     
     .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
     .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
@@ -46,11 +46,11 @@
     .icon-btn{background:transparent;border:0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:#444}
     
     /* Icon-Styling für einheitliche schwarze Linien */
-    .btn svg, .icon-btn svg, label.btn svg {width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .btn svg, .icon-btn svg {width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
     .card-title{font-weight:700;margin-bottom:8px}
     .field{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-    label{min-width:90px;color:var(--muted);font-size:14px}
+    label.form-label{min-width:90px;color:var(--muted);font-size:14px}
     input[type="text"],select,input[type="number"]{padding:8px;border-radius:8px;border:1px solid #e6e6f0;min-width:120px}
     .small{font-size:13px;color:var(--muted)}
 
@@ -166,11 +166,12 @@
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Export
       </button>
-      <label class="btn ghost" style="margin:0;">
+      
+      <button class="btn ghost" id="btn-trigger-import">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         Import
-        <input type="file" id="btn-import" accept=".txt" style="display:none"/>
-      </label>
+      </button>
+      <input type="file" id="btn-import" accept=".txt" style="display:none"/>
     </div>
   </div>
 
@@ -179,8 +180,8 @@
       <div class="modal">
         <div class="card-title" id="modal-title">Titel</div>
         <div style="margin-top:8px">
-          <div class="field"><label>Name</label><input id="modal-name" /></div>
-          <div class="field"><label>Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
+          <div class="field"><label class="form-label">Name</label><input id="modal-name" /></div>
+          <div class="field"><label class="form-label">Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
         </div>
         <footer>
           <button class="btn ghost" id="modal-cancel">Abbrechen</button>
@@ -343,7 +344,7 @@
 
     window.addEventListener('beforeunload',()=>{ save(subjects) })
 
-    // ── Export (Reiner Text ohne ASCII-Linien) ─────────────────────────────────
+    // ── Export ─────────────────────────────────
     document.getElementById('btn-export').addEventListener('click',()=>{
       const now = new Date()
       const dateStr = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})
@@ -398,7 +399,12 @@
       a.click(); URL.revokeObjectURL(url)
     })
 
-    // ── Import ──────────────────────────────────────────────────────────────
+    // Erzwungener Trigger für die mobile Dateiauswahl über JavaScript
+    document.getElementById('btn-trigger-import').addEventListener('click', () => {
+      document.getElementById('btn-import').click();
+    });
+
+    // ── Import Dateiverarbeitung ───────────────────────────────────────────
     document.getElementById('btn-import').addEventListener('change', e=>{
       const file = e.target.files[0]; if(!file) return
       const reader = new FileReader()
