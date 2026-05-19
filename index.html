@@ -22,13 +22,21 @@
       cursor:pointer;
       display:inline-flex;
       align-items:center;
+      justify-content:center;
       gap:6px;
       font-family:Inter,Segoe UI,Roboto,Arial;
       font-size:14px;
       font-weight:600;
       box-sizing:border-box;
+      min-height:38px;
     }
     .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
+    
+    /* Quadratischer Button für das Icon */
+    .btn.icon-only {
+      padding:8px;
+      width:38px;
+    }
     
     .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
     .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
@@ -61,7 +69,7 @@
 
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
 
-    /* Unten RECHTS platzierte Steuerung für Export/Import */
+    /* Unten RECHTS platzierte Steuerung für Export/Import & Recalculate */
     .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
     /* modal */
@@ -162,6 +170,10 @@
     </div>
 
     <div class="bottom-controls">
+      <button class="btn ghost icon-only" id="btn-recalculate" title="Alle Noten neu berechnen">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="18" x2="12" y2="18"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
+      </button>
+
       <button class="btn ghost" id="btn-export">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Export
@@ -326,6 +338,30 @@
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
 
+    // Funktion um ALLES komplett frisch durchzurechnen
+    function recalculateEverything(){
+      subjects.forEach(s => {
+        s.avg = calcAverage(s.grades);
+      });
+      save(subjects);
+      renderSubjects();
+      if(currentId){
+        const currentSub = subjects.find(x => x.id === currentId);
+        if(currentSub) showSubject(currentSub);
+      }
+      // Falls die Gesamtübersicht gerade offen ist, diese auch aktualisieren
+      if(document.getElementById('overall-view').style.display === 'block'){
+        openOverallView();
+      }
+    }
+
+    // Event Listener für den Taschenrechner-Button
+    document.getElementById('btn-recalculate').addEventListener('click', () => {
+      recalculateEverything();
+      // Kleines Feedback für den Nutzer
+      alert('Alle Durchschnitte wurden erfolgreich neu berechnet!');
+    });
+
     function openOverallView(){
       document.getElementById('welcome').style.display='none';
       document.getElementById('subject-view').style.display='none';
@@ -399,7 +435,6 @@
       a.click(); URL.revokeObjectURL(url)
     })
 
-    // Erzwungener Trigger für die mobile Dateiauswahl über JavaScript
     document.getElementById('btn-trigger-import').addEventListener('click', () => {
       document.getElementById('btn-import').click();
     });
