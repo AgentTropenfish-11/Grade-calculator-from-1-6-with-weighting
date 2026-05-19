@@ -56,8 +56,8 @@
       <div class="controls">
         <button class="btn" id="btn-add">Add Subject</button>
         <button class="btn ghost" id="btn-overall">Overall GPA</button>
-        <button class="btn ghost" id="btn-export">⬇ Export</button>
-        <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;box-sizing:border-box;height:35px;vertical-align:middle">⬆ Import<input type="file" id="btn-import" accept=".txt" style="display:none"/></label>
+        <button class="btn ghost" id="btn-export">Export</button>
+        <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;box-sizing:border-box;height:35px;vertical-align:middle">Import<input type="file" id="btn-import" accept=".txt" style="display:none"/></label>
       </div>
     </div>
 
@@ -217,7 +217,7 @@
         const row=document.createElement('div'); row.className='grade-row'
         const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.01'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
         inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
-        const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent='Weight: ' + w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
+        const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
         const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑️'; del.title='Delete grade row'
         del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
@@ -263,57 +263,52 @@
 
     window.addEventListener('beforeunload',()=>{ save(subjects) })
 
-    // ── Export ──────────────────────────────────────────────────────────────
+    // ── Export (Geändert: Reiner Fließtext ohne ASCII-Box-Grafiken) ──────────
     document.getElementById('btn-export').addEventListener('click',()=>{
-      const line = (char,n) => char.repeat(n)
-      const pad  = (str,n) => String(str).padEnd(n)
       const now = new Date()
       const dateStr = now.toLocaleDateString('en-US',{day:'2-digit',month:'2-digit',year:'numeric'})
       const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
 
       let txt = ''
-      txt += '╔' + line('═',56) + '╗\n'
-      txt += '║' + ' GRADE CALCULATOR – REPORT CARD'.padEnd(56) + '║\n'
-      txt += '║' + (' Exported on ' + dateStr + ' at ' + timeStr).padEnd(56) + '║\n'
-      txt += '╚' + line('═',56) + '╝\n\n'
+      txt += 'GRADE CALCULATOR – REPORT CARD\n'
+      txt += 'Exported on ' + dateStr + ' at ' + timeStr + '\n'
+      txt += '========================================\n\n'
 
       if(subjects.length === 0){
-        txt += '  (No subjects available)\n'
+        txt += '(No subjects available)\n'
       } else {
         subjects.forEach((s,si)=>{
-          txt += '┌' + line('─',54) + '┐\n'
-          txt += '│ ' + pad('Subject: ' + s.name, 53) + '│\n'
+          txt += 'Subject: ' + s.name + '\n'
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          txt += '│ ' + pad('Average: ' + avgStr, 53) + '│\n'
-          txt += '├' + line('─',54) + '┤\n'
+          txt += 'Average: ' + avgStr + '\n'
+          txt += '----------------------------------------\n'
+          
           if(!s.grades || s.grades.length===0){
-            txt += '│ ' + pad('  (no grades recorded)', 53) + '│\n'
+            txt += '  (No grades recorded)\n'
           } else {
-            txt += '│ ' + pad('  No.  Grade', 20) + pad('Weight', 18) + pad('Contribution', 17) + '│\n'
-            txt += '│ ' + line('·',53) + '│\n'
             s.grades.forEach((g,i)=>{
               const val = parseFloatOrNull(g.value)
               const w   = parseFloat(g.weight)||0
               const contrib = (val!=null && val>=1 && val<=6) ? (val*w).toFixed(2) : '--'
-              txt += '│ ' + pad('  '+(i+1)+'.   '+(val!=null?val.toFixed(2):'--'), 20) + pad('  x'+w, 18) + pad('  = '+contrib, 17) + '│\n'
+              txt += '  Grade ' + (i+1) + ': ' + (val!=null ? val.toFixed(2) : '--') + ' [Weight: ' + w + '] (Contrib: ' + contrib + ')\n'
             })
           }
-          txt += '└' + line('─',54) + '┘\n\n'
+          txt += '\n'
         })
 
-        txt += '╔' + line('═',56) + '╗\n'
-        txt += '║ OVERALL SUMMARY'.padEnd(57) + '║\n'
-        txt += '╠' + line('═',56) + '╣\n'
+        txt += '========================================\n'
+        txt += 'OVERALL SUMMARY\n'
+        txt += '========================================\n'
         let total=0,count=0
         subjects.forEach(s=>{
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          txt += '║ ' + pad(s.name, 40) + pad(avgStr, 15) + '║\n'
+          txt += s.name + ': ' + avgStr + '\n'
           if(s.avg!=null){ total+=s.avg; count++ }
         })
-        txt += '╠' + line('═',56) + '╣\n'
+        txt += '----------------------------------------\n'
         const overall = count>0 ? formatAvg(total/count) : '--'
-        txt += '║ ' + pad('Overall GPA:', 40) + pad(overall, 15) + '║\n'
-        txt += '╚' + line('═',56) + '╝\n\n'
+        txt += 'Overall GPA: ' + overall + '\n\n'
+        
         txt += '--- JSON Data (Do not edit) ---\n'
         txt += JSON.stringify(subjects)
       }
