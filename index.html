@@ -48,7 +48,11 @@
     .dot{width:18px;height:18px;border-radius:6px;flex-shrink:0}
     .meta{display:flex;flex-direction:column;min-width:0}
     .meta .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .meta .avg{font-size:13px;color:var(--muted)}
+    
+    /* Durchschnitts-Anzeige im Fach nebeneinander */
+    .meta .avg-container {font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+    .meta .avg-main {font-weight: 500;}
+    .meta .avg-alt {opacity: 0.85; font-style: italic;}
     
     .controls{display:flex;gap:6px;align-items:center;flex-shrink:0}
     .icon-btn{background:transparent;border:0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:#444}
@@ -158,7 +162,7 @@
                   Note hinzufügen
                 </button>
               </div>
-              <div style="margin-top:12px;font-weight:700">Durchschnitt: <span id="calc-result">–</span></div>
+              <div style="margin-top:12px;font-weight:700">Durchschnitt (gewichtet): <span id="calc-result">–</span></div>
             </div>
           </div>
 
@@ -227,7 +231,6 @@
     const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
     
-    // Icons für An- / Ausschalten (Auge sichtbar / unsichtbar)
     const iconEyeOpen = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const iconEyeClosed = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
@@ -236,6 +239,8 @@
       container.innerHTML=''
       if(subjects.length===0){ document.getElementById('empty-msg').style.display='block' } else { document.getElementById('empty-msg').style.display='none' }
       subjects.forEach(s=>{
+        const unweightedAvg = calcUnweightedAverage(s.grades);
+        
         const el = document.createElement('div')
         el.className='subject'
         el.innerHTML = `
@@ -243,7 +248,10 @@
             <div class="dot" style="background:${s.color}"></div>
             <div class="meta">
               <div class="name">${escapeHtml(s.name)}</div>
-              <div class="avg">${s.avg==null? '–' : formatAvg(s.avg)}</div>
+              <div class="avg-container">
+                <span class="avg-main" title="Gewichteter Durchschnitt">Ø ${s.avg==null? '–' : formatAvg(s.avg)}</span>
+                <span class="avg-alt" title="Ungewichteter Durchschnitt">(Ungew.: ${unweightedAvg==null? '–' : formatAvg(unweightedAvg)})</span>
+              </div>
             </div>
           </div>
           <div class="controls">
@@ -305,9 +313,10 @@
       showSubject(s)
     }
     function showSubject(s){
+      const unweighted = calcUnweightedAverage(s.grades);
       document.getElementById('sub-name').textContent=s.name
       document.getElementById('sub-name').style.color=s.color
-      document.getElementById('sub-avg').textContent='Durchschnitt: '+(s.avg==null?'–':formatAvg(s.avg))
+      document.getElementById('sub-avg').textContent='Gewichtet: '+(s.avg==null?'–':formatAvg(s.avg)) + ' | Ungewichtet: '+(unweighted==null?'–':formatAvg(unweighted))
       document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
       renderGradeRows(s)
       renderSubjects()
@@ -319,7 +328,6 @@
       if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">Keine Noten. Füge Noten hinzu.</div>'; return }
       s.grades.forEach((g,idx)=>{
         const row=document.createElement('div'); 
-        // Falls inaktiv, Klasse zum Ausgrauen setzen
         row.className='grade-row' + (g.disabled ? ' disabled' : '');
         
         const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
@@ -330,7 +338,6 @@
         sel.disabled = !!g.disabled;
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
         
-        // Button zum An- / Ausschalten
         const toggleBtn=document.createElement('button'); toggleBtn.className='icon-btn';
         toggleBtn.innerHTML = g.disabled ? iconEyeClosed : iconEyeOpen;
         toggleBtn.title = g.disabled ? 'Note aktivieren' : 'Note deaktivieren';
@@ -356,12 +363,12 @@
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
-    // Berechnung (ignoriert deaktivierte Zeilen komplett)
+    // Berechnung (Gewichtet)
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
       for(const g of grades){ 
-        if(g.disabled) continue; // Überspringen, wenn deaktiviert
+        if(g.disabled) continue; 
         const val=parseFloatOrNull(g.value); 
         const w=parseFloat(g.weight)||0; 
         if(val==null) continue; 
@@ -370,6 +377,21 @@
       }
       if(den===0) return null
       return Math.round((num/den)*100)/100
+    }
+
+    // Zusätzliche Berechnung (Ungewichtet)
+    function calcUnweightedAverage(grades){
+      if(!grades||grades.length===0) return null
+      let sum=0, count=0
+      for(const g of grades){
+        if(g.disabled) continue;
+        const val=parseFloatOrNull(g.value);
+        if(val==null || val<1 || val>6) continue;
+        sum+=val;
+        count++;
+      }
+      if(count===0) return null
+      return Math.round((sum/count)*100)/100
     }
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
@@ -399,12 +421,13 @@
       let total=0,count=0
       
       subjects.forEach(s=>{
-        // Zählen, wie viele Noten in diesem Fach aktuell deaktiviert / aus sind
         const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
         const inactiveText = inactiveCount > 0 ? `<span class="inactive-count">(Inaktiv: ${inactiveCount}x)</span>` : '';
-        
+        const unweighted = calcUnweightedAverage(s.grades);
+        const unweightedStr = unweighted == null ? '–' : formatAvg(unweighted);
+
         const tr=document.createElement('tr')
-        tr.innerHTML=`<td>${escapeHtml(s.name)}${inactiveText}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
+        tr.innerHTML=`<td>${escapeHtml(s.name)}${inactiveText}</td><td>Gewichtet: ${s.avg==null?'–':formatAvg(s.avg)} <br><small style="color:var(--muted)">Ungewichtet: ${unweightedStr}</small></td>`
         tbody.appendChild(tr)
         if(s.avg!=null){ total+=s.avg; count++ }
       })
@@ -431,7 +454,9 @@
         subjects.forEach((s,si)=>{
           txt += 'Fach: ' + s.name + '\n'
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          txt += 'Durchschnitt: ' + avgStr + '\n'
+          const unweighted = calcUnweightedAverage(s.grades)
+          const unweightedStr = unweighted==null ? '--' : formatAvg(unweighted)
+          txt += 'Durchschnitt (Gewichtet): ' + avgStr + ' | (Ungewichtet): ' + unweightedStr + '\n'
           txt += '----------------------------------------\n'
           if(!s.grades || s.grades.length===0){
             txt += '  (keine Noten eingetragen)\n'
@@ -452,9 +477,11 @@
         txt += '========================================\n'
         subjects.forEach(s=>{
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
+          const unweighted = calcUnweightedAverage(s.grades)
+          const unweightedStr = unweighted==null ? '--' : formatAvg(unweighted)
           const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
           const inactiveStr = inactiveCount > 0 ? ` (Inaktiv: ${inactiveCount}x)` : '';
-          txt += s.name + inactiveStr + ': ' + avgStr + '\n'
+          txt += s.name + inactiveStr + ': Gewichtet: ' + avgStr + ' | Ungewichtet: ' + unweightedStr + '\n'
         })
         txt += '----------------------------------------\n'
         let total=0,count=0
