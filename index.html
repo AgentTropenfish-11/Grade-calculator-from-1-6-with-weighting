@@ -7,198 +7,119 @@
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--muted:#6b7280}
     body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#111}
-    .app{max-width:980px;margin:28px auto;padding:20px;display:flex;flex-direction:column;min-height:90vh}
-    .main-content{flex:1}
+    .app{max-width:980px;margin:28px auto;padding:20px}
     h1{margin:0 0 12px;font-size:20px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    
-    /* Einheitliche Formatierung für alle Buttons */
-    .btn {
-      background:#111;
-      color:#fff;
-      padding:8px 12px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      font-family:Inter,Segoe UI,Roboto,Arial;
-      font-size:14px;
-      font-weight:600;
-      box-sizing:border-box;
-      min-height:38px;
-    }
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .btn{background:#111;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
-    
-    /* Quadratischer Button für das Icon */
-    .btn.icon-only {
-      padding:8px;
-      width:38px;
-    }
-    
     .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
     .panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 1px 4px rgba(16,24,40,.06)}
-    
-    /* Fächerliste für Mobilgeräte optimiert */
     .subject-list{display:flex;flex-direction:column;gap:10px}
-    .subject{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border-radius:10px;cursor:pointer;background:#fff;border:1px solid #f0f0f0}
-    .subject-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-    .dot{width:18px;height:18px;border-radius:6px;flex-shrink:0}
-    .meta{display:flex;flex-direction:column;min-width:0}
-    .meta .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    
-    /* Durchschnitts-Anzeige im Fach nebeneinander */
-    .meta .avg-container {font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
-    .meta .avg-main {font-weight: 500;}
-    .meta .avg-alt {opacity: 0.85; font-style: italic;}
-    
-    .controls{display:flex;gap:6px;align-items:center;flex-shrink:0}
-    .icon-btn{background:transparent;border:0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:#444}
-    
-    /* Icon-Styling für einheitliche Linien */
-    .btn svg, .icon-btn svg {width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .subject{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+    .dot{width:18px;height:18px;border-radius:6px}
+    .meta{display:flex;flex-direction:column}
+    .meta .name{font-weight:600}
+    .meta .avg{font-size:13px;color:var(--muted)}
+    .controls{display:flex;gap:8px;align-items:center}
 
     .card-title{font-weight:700;margin-bottom:8px}
     .field{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-    label.form-label{min-width:90px;color:var(--muted);font-size:14px}
+    label{min-width:90px;color:var(--muted);font-size:14px}
     input[type="text"],select,input[type="number"]{padding:8px;border-radius:8px;border:1px solid #e6e6f0;min-width:120px}
     .small{font-size:13px;color:var(--muted)}
 
     .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
     .grade-row{display:flex;gap:8px;align-items:center;transition:opacity 0.2s}
     
-    /* Style für deaktivierte/ausgegraute Notenzeilen */
-    .grade-row.disabled {
-      opacity: 0.35;
-    }
-    .grade-row.disabled input, .grade-row.disabled select {
-      background: #f0f0f0;
-      color: #888;
-    }
+    /* Zustand für inaktive/ausgeblendete Notenzeilen */
+    .grade-row.disabled { opacity: 0.35; }
+    .grade-row.disabled input, .grade-row.disabled select { background: #f0f0f0; color: #888; }
     
     .grade-row input{width:100px}
     .grade-row select{width:120px}
+    .icon-btn{background:transparent;border:0;cursor:pointer;font-size:16px}
 
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
 
-    /* Unten RECHTS platzierte Steuerung für Export/Import & Recalculate */
-    .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
+    /* Ausgegrauter ungewichteter Text */
+    .unweighted-text { color: var(--muted); font-weight: normal; font-size: 14px; margin-left: 8px; opacity: 0.75; }
+    .inactive-count { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal; }
 
     /* modal */
     .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center}
     .modal{background:#fff;padding:16px;border-radius:12px;width:420px}
+    .row{display:flex;justify-content:space-between;gap:8px}
     footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border:1px solid #ddd;padding:8px;text-align:left}
     th{background:#f0f0f0}
-    .inactive-count {font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal;}
 
-    @media (max-width:720px){
-      .layout{grid-template-columns:1fr} 
-      .top{flex-direction:column;align-items:flex-start}
-      .controls-top{width:100%;display:flex;flex-wrap:wrap;gap:8px}
-      .bottom-controls{justify-content:flex-end;margin-top:24px}
-    }
+    @media (max-width:720px){.layout{grid-template-columns:1fr} .top{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="main-content">
-      <div class="top">
-        <h1>Notenrechner</h1>
-        <div class="controls-top" style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="btn-add">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Fach hinzufügen
-          </button>
-          <button class="btn ghost" id="btn-overall">
-            <svg viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
-            Gesamtnotendurchschnitt
-          </button>
-        </div>
-      </div>
-
-      <div class="layout">
-        <div class="panel" id="left">
-          <div class="card-title">Fächer</div>
-          <div id="subjects" class="subject-list"></div>
-          <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
-        </div>
-
-        <div class="panel" id="right">
-          <div id="welcome">
-            <div class="card-title">Wähle ein Fach</div>
-          </div>
-
-          <div id="subject-view" style="display:none">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div id="sub-name" style="font-size:18px;font-weight:700"></div>
-                <div id="sub-avg" class="small" style="margin-top:4px"></div>
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="btn ghost" id="btn-edit-sub">
-                  <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  Bearbeiten
-                </button>
-                <button class="btn" id="btn-back">
-                  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                  Zurück
-                </button>
-              </div>
-            </div>
-
-            <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
-
-            <div>
-              <div class="card-title">Noten</div>
-              <div class="grade-rows" id="grade-rows"></div>
-              <div style="margin-top:10px;display:flex;gap:8px">
-                <button class="btn ghost" id="btn-add-grade">
-                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  Note hinzufügen
-                </button>
-              </div>
-              <div style="margin-top:12px;font-weight:700">Durchschnitt (gewichtet): <span id="calc-result">–</span></div>
-            </div>
-          </div>
-
-          <div id="overall-view" style="display:none">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div class="card-title">Gesamtnotendurchschnitt</div>
-              <div><button class="btn" id="btn-overall-back">
-                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Zurück
-              </button></div>
-            </div>
-            <table id="overall-table">
-              <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
-          </div>
-        </div>
+    <div class="top">
+      <h1>Notenrechner</h1>
+      <div class="controls">
+        <button class="btn" id="btn-add">Fach hinzufügen</button>
+        <button class="btn ghost" id="btn-overall">Gesamtnotendurchschnitt</button>
+        <button class="btn ghost" id="btn-export">⬇ Export</button>
+        <label class="btn ghost" style="cursor:pointer;margin:0;display:inline-flex;align-items:center">⬆ Import<input type="file" id="btn-import" accept=".txt" style="display:none"/></label>
       </div>
     </div>
 
-    <div class="bottom-controls">
-      <button class="btn ghost icon-only" id="btn-recalculate" title="Alle Noten neu berechnen">
-        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="18" x2="12" y2="18"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
-      </button>
+    <div class="layout">
+      <div class="panel" id="left">
+        <div class="card-title">Fächer</div>
+        <div id="subjects" class="subject-list"></div>
+        <div id="empty-msg" class="empty" style="display:none">Noch keine Fächer. Klicke auf "Fach hinzufügen".</div>
+      </div>
 
-      <button class="btn ghost" id="btn-export">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Export
-      </button>
-      
-      <button class="btn ghost" id="btn-trigger-import">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-        Import
-      </button>
-      <input type="file" id="btn-import" accept=".txt" style="display:none"/>
+      <div class="panel" id="right">
+        <div id="welcome">
+          <div class="card-title">Wähle ein Fach</div>
+        </div>
+
+        <div id="subject-view" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div id="sub-name" style="font-size:18px;font-weight:700"></div>
+              <div id="sub-avg" class="small" style="margin-top:4px"></div>
+            </div>
+            <div>
+              <button class="btn ghost" id="btn-edit-sub">Bearbeiten</button>
+              <button class="btn" id="btn-back">Zurück</button>
+            </div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
+
+          <div>
+            <div class="card-title">Noten</div>
+            <div class="grade-rows" id="grade-rows"></div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn ghost" id="btn-add-grade">Note hinzufügen</button>
+            </div>
+            <div style="margin-top:12px;font-weight:700">
+              Durchschnitt: <span id="calc-result">–</span><span id="unweighted-result" class="unweighted-text"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="overall-view" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="card-title">Gesamtnotendurchschnitt</div>
+            <div><button class="btn" id="btn-overall-back">Zurück</button></div>
+          </div>
+          <table id="overall-table">
+            <thead><tr><th>Fach</th><th>Durchschnitt</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div style="margin-top:12px;font-weight:700">Gesamtdurchschnitt: <span id="overall-avg">–</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -207,8 +128,8 @@
       <div class="modal">
         <div class="card-title" id="modal-title">Titel</div>
         <div style="margin-top:8px">
-          <div class="field"><label class="form-label">Name</label><input id="modal-name" /></div>
-          <div class="field"><label class="form-label">Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
+          <div class="field"><label>Name</label><input id="modal-name" /></div>
+          <div class="field"><label>Farbe</label><input id="modal-color" type="color" value="#4f46e5"/></div>
         </div>
         <footer>
           <button class="btn ghost" id="modal-cancel">Abbrechen</button>
@@ -226,54 +147,32 @@
     let subjects = load()
     let currentId = null
 
-    function formatAvg(a){ if(a==null) return '—'; return a.toFixed(2).replace('.',',') }
-
-    const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-    const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-    
-    const iconEyeOpen = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-    const iconEyeClosed = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+    function formatAvg(a){ if(a==null) return '—'; return a.toFixed(1).replace('.',',') }
 
     function renderSubjects(){
       const container = document.getElementById('subjects')
       container.innerHTML=''
       if(subjects.length===0){ document.getElementById('empty-msg').style.display='block' } else { document.getElementById('empty-msg').style.display='none' }
       subjects.forEach(s=>{
-        const unweightedAvg = calcUnweightedAverage(s.grades);
-        
         const el = document.createElement('div')
         el.className='subject'
         el.innerHTML = `
-          <div class="subject-info">
-            <div class="dot" style="background:${s.color}"></div>
-            <div class="meta">
-              <div class="name">${escapeHtml(s.name)}</div>
-              <div class="avg-container">
-                <span class="avg-main" title="Gewichteter Durchschnitt">Ø ${s.avg==null? '–' : formatAvg(s.avg)}</span>
-                <span class="avg-alt" title="Ungewichteter Durchschnitt">(Ungew.: ${unweightedAvg==null? '–' : formatAvg(unweightedAvg)})</span>
-              </div>
-            </div>
+          <div class="dot" style="background:${s.color}"></div>
+          <div style="flex:1">
+            <div class="meta"><div class="name">${escapeHtml(s.name)}</div><div class="avg">${s.avg==null? '–' : formatAvg(s.avg)}</div></div>
           </div>
           <div class="controls">
-            <button class="icon-btn edit-btn" title="Bearbeiten">${iconEdit}</button>
-            <button class="icon-btn del-btn" title="Löschen">${iconDel}</button>
+            <button class="icon-btn" title="Bearbeiten" data-id="${s.id}" data-action="edit">✏️</button>
+            <button class="icon-btn" title="Löschen" data-id="${s.id}" data-action="del">🗑️</button>
           </div>
         `
-        
-        el.querySelector('.edit-btn').addEventListener('click', (e) => {
-          openEditModal(s.id);
-          e.stopPropagation();
-        });
-        
-        el.querySelector('.del-btn').addEventListener('click', (e) => {
-          if(confirm('Fach wirklich löschen?')){ removeSubject(s.id) };
-          e.stopPropagation();
-        });
-
-        el.addEventListener('click', () => {
+        el.addEventListener('click',(e)=>{
+          const action = e.target.getAttribute('data-action')
+          const id = e.target.getAttribute('data-id')
+          if(action==='edit'){ openEditModal(id); e.stopPropagation(); return }
+          if(action==='del'){ if(confirm('Fach wirklich löschen?')){ removeSubject(id) }; e.stopPropagation(); return }
           openSubject(s.id)
-        });
-
+        })
         container.appendChild(el)
       })
     }
@@ -316,8 +215,17 @@
       const unweighted = calcUnweightedAverage(s.grades);
       document.getElementById('sub-name').textContent=s.name
       document.getElementById('sub-name').style.color=s.color
-      document.getElementById('sub-avg').textContent='Gewichtet: '+(s.avg==null?'–':formatAvg(s.avg)) + ' | Ungewichtet: '+(unweighted==null?'–':formatAvg(unweighted))
+      document.getElementById('sub-avg').textContent='Durchschnitt: '+(s.avg==null?'–':formatAvg(s.avg))
       document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
+      
+      // Ungewichteten Schnitt ausgegraut danebenschreiben
+      const unweightedEl = document.getElementById('unweighted-result');
+      if (unweighted != null) {
+        unweightedEl.textContent = `(Ungewichtet: ${formatAvg(unweighted)})`;
+      } else {
+        unweightedEl.textContent = '';
+      }
+
       renderGradeRows(s)
       renderSubjects()
     }
@@ -338,15 +246,16 @@
         sel.disabled = !!g.disabled;
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
         
+        // Auge-Button zum Deaktivieren/Aktivieren direkt neben dem Löschen-Mülleimer
         const toggleBtn=document.createElement('button'); toggleBtn.className='icon-btn';
-        toggleBtn.innerHTML = g.disabled ? iconEyeClosed : iconEyeOpen;
-        toggleBtn.title = g.disabled ? 'Note aktivieren' : 'Note deaktivieren';
+        toggleBtn.textContent = g.disabled ? '👁️‍🗨️' : '👁️';
+        toggleBtn.title = g.disabled ? 'Note einschalten' : 'Note ausschalten';
         toggleBtn.addEventListener('click', () => {
           s.grades[idx].disabled = !s.grades[idx].disabled;
           updateAvgForSubject(s);
         });
 
-        const del=document.createElement('button'); del.className='icon-btn'; del.innerHTML=iconDel; del.title='Notenzeile löschen'
+        const del=document.createElement('button'); del.className='icon-btn'; del.textContent='🗑️'; del.title='Notenzeile löschen'
         del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
         
         row.appendChild(inNum); row.appendChild(sel); row.appendChild(toggleBtn); row.appendChild(del)
@@ -363,12 +272,12 @@
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
-    // Berechnung (Gewichtet)
+    // Gewichtete Berechnung
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
       for(const g of grades){ 
-        if(g.disabled) continue; 
+        if(g.disabled) continue; // Inaktive ignorieren
         const val=parseFloatOrNull(g.value); 
         const w=parseFloat(g.weight)||0; 
         if(val==null) continue; 
@@ -376,42 +285,25 @@
         num+=val*w; den+=w 
       }
       if(den===0) return null
-      return Math.round((num/den)*100)/100
+      return Math.round((num/den)*10)/10
     }
 
-    // Zusätzliche Berechnung (Ungewichtet)
+    // Ungewichtete Berechnung
     function calcUnweightedAverage(grades){
       if(!grades||grades.length===0) return null
       let sum=0, count=0
       for(const g of grades){
-        if(g.disabled) continue;
+        if(g.disabled) continue; // Inaktive ignorieren
         const val=parseFloatOrNull(g.value);
         if(val==null || val<1 || val>6) continue;
         sum+=val;
         count++;
       }
       if(count===0) return null
-      return Math.round((sum/count)*100)/100
+      return Math.round((sum/count)*10)/10
     }
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
-
-    function recalculateEverything(){
-      subjects.forEach(s => {
-        s.avg = calcAverage(s.grades);
-      });
-      save(subjects); renderSubjects();
-      if(currentId){
-        const currentSub = subjects.find(x => x.id === currentId);
-        if(currentSub) showSubject(currentSub);
-      }
-      if(document.getElementById('overall-view').style.display === 'block'){ openOverallView(); }
-    }
-
-    document.getElementById('btn-recalculate').addEventListener('click', () => {
-      recalculateEverything();
-      alert('Alle Durchschnitte wurden erfolgreich neu berechnet!');
-    });
 
     function openOverallView(){
       document.getElementById('welcome').style.display='none';
@@ -419,15 +311,12 @@
       document.getElementById('overall-view').style.display='block';
       const tbody=document.querySelector('#overall-table tbody'); tbody.innerHTML=''
       let total=0,count=0
-      
       subjects.forEach(s=>{
         const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
         const inactiveText = inactiveCount > 0 ? `<span class="inactive-count">(Inaktiv: ${inactiveCount}x)</span>` : '';
-        const unweighted = calcUnweightedAverage(s.grades);
-        const unweightedStr = unweighted == null ? '–' : formatAvg(unweighted);
 
         const tr=document.createElement('tr')
-        tr.innerHTML=`<td>${escapeHtml(s.name)}${inactiveText}</td><td>Gewichtet: ${s.avg==null?'–':formatAvg(s.avg)} <br><small style="color:var(--muted)">Ungewichtet: ${unweightedStr}</small></td>`
+        tr.innerHTML=`<td>${escapeHtml(s.name)}${inactiveText}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
         tbody.appendChild(tr)
         if(s.avg!=null){ total+=s.avg; count++ }
       })
@@ -437,57 +326,62 @@
 
     window.addEventListener('beforeunload',()=>{ save(subjects) })
 
-    // ── Export ─────────────────────────────────
+    // ── Export ──────────────────────────────────────────────────────────────
     document.getElementById('btn-export').addEventListener('click',()=>{
+      const line = (char,n) => char.repeat(n)
+      const pad  = (str,n) => String(str).padEnd(n)
       const now = new Date()
       const dateStr = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})
       const timeStr = now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})
 
       let txt = ''
-      txt += 'NOTENRECHNER – NOTENLISTE\n'
-      txt += 'Exportiert am ' + dateStr + ' um ' + timeStr + ' Uhr\n'
-      txt += '========================================\n\n'
+      txt += '╔' + line('═',56) + '╗\n'
+      txt += '║' + ' NOTENRECHNER – NOTENLISTE'.padEnd(56) + '║\n'
+      txt += '║' + (' Exportiert am ' + dateStr + ' um ' + timeStr + ' Uhr').padEnd(56) + '║\n'
+      txt += '╚' + line('═',56) + '╝\n\n'
 
       if(subjects.length === 0){
-        txt += '(Keine Fächer vorhanden)\n'
+        txt += '  (Keine Fächer vorhanden)\n'
       } else {
         subjects.forEach((s,si)=>{
-          txt += 'Fach: ' + s.name + '\n'
+          txt += '┌' + line('─',54) + '┐\n'
+          txt += '│ ' + pad('Fach: ' + s.name, 53) + '│\n'
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
           const unweighted = calcUnweightedAverage(s.grades)
           const unweightedStr = unweighted==null ? '--' : formatAvg(unweighted)
-          txt += 'Durchschnitt (Gewichtet): ' + avgStr + ' | (Ungewichtet): ' + unweightedStr + '\n'
-          txt += '----------------------------------------\n'
+          txt += '│ ' + pad('Durchschnitt: ' + avgStr + ' (Ungewichtet: ' + unweightedStr + ')', 53) + '│\n'
+          txt += '├' + line('─',54) + '┤\n'
           if(!s.grades || s.grades.length===0){
-            txt += '  (keine Noten eingetragen)\n'
+            txt += '│ ' + pad('  (keine Noten eingetragen)', 53) + '│\n'
           } else {
+            txt += '│ ' + pad('  Nr.  Note', 20) + pad('Gewichtung', 18) + pad('Beitrag', 17) + '│\n'
+            txt += '│ ' + line('·',53) + '│\n'
             s.grades.forEach((g,i)=>{
               const val = parseFloatOrNull(g.value)
               const w   = parseFloat(g.weight)||0
-              const statusStr = g.disabled ? ' [DEAKTIVIERT/AUS]' : '';
+              const statusStr = g.disabled ? ' [AUS]' : '';
               const contrib = (val!=null && val>=1 && val<=6 && !g.disabled) ? (val*w).toFixed(2) : '--'
-              txt += '  Note ' + (i+1) + ': ' + (val!=null?val:'--') + ' [Gewichtung: ' + w + '] (Beitrag: ' + contrib + ')' + statusStr + '\n'
+              txt += '│ ' + pad('  '+(i+1)+'.   '+(val!=null?val:'--'), 20) + pad('  x'+w, 18) + pad('  = '+contrib + statusStr, 17) + '│\n'
             })
           }
-          txt += '\n'
+          txt += '└' + line('─',54) + '┘\n\n'
         })
 
-        txt += '========================================\n'
-        txt += 'GESAMTUEBERSICHT\n'
-        txt += '========================================\n'
+        txt += '╔' + line('═',56) + '╗\n'
+        txt += '║ GESAMTUEBERSICHT'.padEnd(57) + '║\n'
+        txt += '╠' + line('═',56) + '╣\n'
+        let total=0,count=0
         subjects.forEach(s=>{
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          const unweighted = calcUnweightedAverage(s.grades)
-          const unweightedStr = unweighted==null ? '--' : formatAvg(unweighted)
           const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
           const inactiveStr = inactiveCount > 0 ? ` (Inaktiv: ${inactiveCount}x)` : '';
-          txt += s.name + inactiveStr + ': Gewichtet: ' + avgStr + ' | Ungewichtet: ' + unweightedStr + '\n'
+          txt += '║ ' + pad(s.name + inactiveStr, 40) + pad(avgStr, 15) + '║\n'
+          if(s.avg!=null){ total+=s.avg; count++ }
         })
-        txt += '----------------------------------------\n'
-        let total=0,count=0
-        subjects.forEach(s=>{ if(s.avg!=null){ total+=s.avg; count++ } })
+        txt += '╠' + line('═',56) + '╣\n'
         const overall = count>0 ? formatAvg(total/count) : '--'
-        txt += 'Gesamtdurchschnitt: ' + overall + '\n\n'
+        txt += '║ ' + pad('Gesamtdurchschnitt:', 40) + pad(overall, 15) + '║\n'
+        txt += '╚' + line('═',56) + '╝\n\n'
         txt += '--- JSON-Daten (nicht bearbeiten) ---\n'
         txt += JSON.stringify(subjects)
       }
@@ -499,11 +393,7 @@
       a.click(); URL.revokeObjectURL(url)
     })
 
-    document.getElementById('btn-trigger-import').addEventListener('click', () => {
-      document.getElementById('btn-import').click();
-    });
-
-    // ── Import Dateiverarbeitung ───────────────────────────────────────────
+    // ── Import ──────────────────────────────────────────────────────────────
     document.getElementById('btn-import').addEventListener('change', e=>{
       const file = e.target.files[0]; if(!file) return
       const reader = new FileReader()
