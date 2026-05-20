@@ -13,6 +13,8 @@
       --border:#e6e6f0;
       --border-sub:#f0f0f0;
       --hr:#eee;
+      --primary:#111;
+      --primary-invert:#fff;
     }
     
     /* Dark Mode Variablen */
@@ -24,6 +26,8 @@
       --border:#334155;
       --border-sub:#1e293b;
       --hr:#334155;
+      --primary:#f8fafc;
+      --primary-invert:#0f172a;
     }
 
     body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:var(--text);transition:background 0.2s, color 0.2s}
@@ -33,8 +37,8 @@
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     
     .btn {
-      background:#111;
-      color:#fff;
+      background:var(--primary);
+      color:var(--primary-invert);
       padding:8px 12px;
       border-radius:8px;
       border:none;
@@ -49,7 +53,6 @@
       box-sizing:border-box;
       min-height:38px;
     }
-    [data-theme="dark"] .btn { background:#f8fafc; color:#0f172a; }
     
     .btn.ghost{background:transparent;color:var(--text);border:1px solid #ddd}
     [data-theme="dark"] .btn.ghost { border-color:var(--border); color:var(--text); }
@@ -94,10 +97,10 @@
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
     .inactive-count { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal; }
 
-    /* Untere Leiste: Komplett rechtsbündig und auf exakt gleicher Höhe */
+    /* Untere Leiste */
     .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
-    /* modal */
+    /* Modals */
     .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:100}
     .modal{background:var(--card);color:var(--text);padding:16px;border-radius:12px;width:420px;box-shadow:0 10px 25px rgba(0,0,0,0.2);border:1px solid var(--border)}
     footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
@@ -105,6 +108,39 @@
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border:1px solid var(--border);padding:8px;text-align:left}
     th{background:var(--bg)}
+
+    /* In-App Toast Benachrichtigungen */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--card);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     @media (max-width:720px){
       .layout{grid-template-columns:1fr} 
@@ -116,6 +152,8 @@
 </head>
 <body>
   <div class="app">
+    <div id="toast-container" class="toast-container"></div>
+
     <div class="main-content">
       <div class="top">
         <h1>Notenrechner</h1>
@@ -261,6 +299,19 @@
     </div>
   </template>
 
+  <template id="confirm-modal-tpl">
+    <div class="modal-back">
+      <div class="modal">
+        <div class="card-title" id="confirm-title">Bestätigen</div>
+        <div style="margin-top:8px; font-size:14px; color:var(--text);" id="confirm-text">Möchtest du das wirklich tun?</div>
+        <footer>
+          <button class="btn ghost" id="confirm-cancel">Abbrechen</button>
+          <button class="btn" id="confirm-ok">Ja, ausführen</button>
+        </footer>
+      </div>
+    </div>
+  </template>
+
   <script>
     const STORAGE_KEY = 'noten_faecher_v1'
     const SETTINGS_KEY = 'noten_settings_v1'
@@ -268,7 +319,6 @@
     function load(){ try{const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): []}catch(e){return []} }
     function save(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)) }
 
-    // Standard-Einstellungen laden
     let config = { theme: 'light', tempGrades: true };
     try {
       const rawConfig = localStorage.getItem(SETTINGS_KEY);
@@ -278,7 +328,6 @@
     let subjects = load()
     let currentId = null
 
-    // Theme initial setzen
     document.documentElement.setAttribute('data-theme', config.theme);
 
     function formatAvg(a){ if(a==null) return '—'; return a.toFixed(2).replace('.',',') }
@@ -287,6 +336,37 @@
     const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
     const iconEyeOpen = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const iconEyeClosed = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
+    // Schöne In-App Notification (Toast)
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ${message}`;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 50);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // In-App Bestätigung (Ersetzt window.confirm)
+    function showConfirm(title, text, onConfirm) {
+      const tpl = document.getElementById('confirm-modal-tpl').content.cloneNode(true);
+      const back = tpl.querySelector('.modal-back');
+      back.querySelector('#confirm-title').textContent = title;
+      back.querySelector('#confirm-text').textContent = text;
+      
+      back.querySelector('#confirm-cancel').addEventListener('click', () => back.remove());
+      back.querySelector('#confirm-ok').addEventListener('click', () => {
+        onConfirm();
+        back.remove();
+      });
+      document.body.appendChild(back);
+    }
 
     function renderSubjects(){
       const container = document.getElementById('subjects')
@@ -315,7 +395,9 @@
         });
         
         el.querySelector('.del-btn').addEventListener('click', (e) => {
-          if(confirm('Fach wirklich löschen?')){ removeSubject(s.id) };
+          showConfirm('Fach löschen', `Möchtest du das Fach "${s.name}" wirklich löschen?`, () => {
+            removeSubject(s.id);
+          });
           e.stopPropagation();
         });
 
@@ -418,7 +500,6 @@
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
-    // Einstellungs-Modal öffnen
     document.getElementById('btn-settings').addEventListener('click', () => {
       const tpl = document.getElementById('settings-modal-tpl').content.cloneNode(true);
       const back = tpl.querySelector('.modal-back');
@@ -441,6 +522,7 @@
           if(s) showSubject(s);
         }
         back.remove();
+        showToast('Einstellungen gespeichert!');
       });
       
       document.body.appendChild(back);
@@ -477,7 +559,7 @@
 
     document.getElementById('btn-recalculate').addEventListener('click', () => {
       recalculateEverything();
-      alert('Alle Durchschnitte wurden erfolgreich neu berechnet!');
+      showToast('Alle Durchschnitte neu berechnet!');
     });
 
     function openOverallView(){
@@ -557,6 +639,7 @@
       const a    = document.createElement('a'); a.href=url
       a.download = 'Notenliste_' + dateStr.replace(/\./g,'-') + '.txt'
       a.click(); URL.revokeObjectURL(url)
+      showToast('Notenliste erfolgreich exportiert!');
     })
 
     document.getElementById('btn-trigger-import').addEventListener('click', () => {
@@ -579,11 +662,13 @@
             parsed = JSON.parse(text.trim())
           }
           if(!Array.isArray(parsed)) throw new Error('kein Array')
-          if(!confirm('Bestehende Fächerliste ersetzen?')) return
-          subjects = parsed; save(subjects); renderSubjects(); closeSubject()
-          alert('Import erfolgreich! ' + subjects.length + ' Fach/Fächer geladen.')
+          
+          showConfirm('Liste ersetzen', 'Möchtest du deine aktuelle Fächerliste wirklich durch die importierte Datei ersetzen?', () => {
+            subjects = parsed; save(subjects); renderSubjects(); closeSubject()
+            showToast(`${subjects.length} Fach/Fächer erfolgreich importiert!`);
+          });
         } catch(_){
-          alert('Datei konnte nicht importiert werden.\nBitte nur Dateien verwenden, die mit diesem Notenrechner exportiert wurden.')
+          showConfirm('Import-Fehler', 'Die Datei konnte nicht importiert werden. Bitte nutze nur gültige Notenrechner-Dateien.', () => {});
         }
         e.target.value=''
       }
