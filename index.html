@@ -53,7 +53,7 @@
     .controls{display:flex;gap:6px;align-items:center;flex-shrink:0}
     .icon-btn{background:transparent;border:0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:#444}
     
-    /* Icon-Styling für einheitliche schwarze Linien */
+    /* Icon-Styling für einheitliche Linien */
     .btn svg, .icon-btn svg {width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
     .card-title{font-weight:700;margin-bottom:8px}
@@ -63,7 +63,17 @@
     .small{font-size:13px;color:var(--muted)}
 
     .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-    .grade-row{display:flex;gap:8px;align-items:center}
+    .grade-row{display:flex;gap:8px;align-items:center;transition:opacity 0.2s}
+    
+    /* Style für deaktivierte/ausgegraute Notenzeilen */
+    .grade-row.disabled {
+      opacity: 0.35;
+    }
+    .grade-row.disabled input, .grade-row.disabled select {
+      background: #f0f0f0;
+      color: #888;
+    }
+    
     .grade-row input{width:100px}
     .grade-row select{width:120px}
 
@@ -80,6 +90,7 @@
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border:1px solid #ddd;padding:8px;text-align:left}
     th{background:#f0f0f0}
+    .inactive-count {font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal;}
 
     @media (max-width:720px){
       .layout{grid-template-columns:1fr} 
@@ -211,11 +222,14 @@
     let subjects = load()
     let currentId = null
 
-    // Rundung auf zwei Nachkommastellen
     function formatAvg(a){ if(a==null) return '—'; return a.toFixed(2).replace('.',',') }
 
     const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     const iconDel = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+    
+    // Icons für An- / Ausschalten (Auge sichtbar / unsichtbar)
+    const iconEyeOpen = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const iconEyeClosed = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
     function renderSubjects(){
       const container = document.getElementById('subjects')
@@ -304,16 +318,31 @@
       const container=document.getElementById('grade-rows'); container.innerHTML=''
       if(!s.grades||s.grades.length===0){ container.innerHTML='<div class="small">Keine Noten. Füge Noten hinzu.</div>'; return }
       s.grades.forEach((g,idx)=>{
-        const row=document.createElement('div'); row.className='grade-row'
+        const row=document.createElement('div'); 
+        // Falls inaktiv, Klasse zum Ausgrauen setzen
+        row.className='grade-row' + (g.disabled ? ' disabled' : '');
+        
         const inNum=document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
+        inNum.disabled = !!g.disabled;
         inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
         
         const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
+        sel.disabled = !!g.disabled;
         sel.addEventListener('change',()=>{ s.grades[idx].weight=parseFloat(sel.value); updateAvgForSubject(s) })
         
+        // Button zum An- / Ausschalten
+        const toggleBtn=document.createElement('button'); toggleBtn.className='icon-btn';
+        toggleBtn.innerHTML = g.disabled ? iconEyeClosed : iconEyeOpen;
+        toggleBtn.title = g.disabled ? 'Note aktivieren' : 'Note deaktivieren';
+        toggleBtn.addEventListener('click', () => {
+          s.grades[idx].disabled = !s.grades[idx].disabled;
+          updateAvgForSubject(s);
+        });
+
         const del=document.createElement('button'); del.className='icon-btn'; del.innerHTML=iconDel; del.title='Notenzeile löschen'
         del.addEventListener('click',()=>{ s.grades.splice(idx,1); updateAvgForSubject(s) })
-        row.appendChild(inNum); row.appendChild(sel); row.appendChild(del)
+        
+        row.appendChild(inNum); row.appendChild(sel); row.appendChild(toggleBtn); row.appendChild(del)
         container.appendChild(row)
       })
     }
@@ -323,42 +352,42 @@
     document.getElementById('btn-add').addEventListener('click',()=>{ openModal('Neues Fach','','#4f46e5',(name,color)=>{ addSubject(name,color) }) })
     document.getElementById('btn-back').addEventListener('click',()=>{ closeSubject() })
     document.getElementById('btn-edit-sub').addEventListener('click',()=>{ if(!currentId) return; openEditModal(currentId) })
-    document.getElementById('btn-add-grade').addEventListener('click',()=>{ if(!currentId) return; const s=subjects.find(x=>x.id===currentId); s.grades.push({value:null,weight:1}); updateAvgForSubject(s) })
+    document.getElementById('btn-add-grade').addEventListener('click',()=>{ if(!currentId) return; const s=subjects.find(x=>x.id===currentId); s.grades.push({value:null,weight:1,disabled:false}); updateAvgForSubject(s) })
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
-    // Berechnung auf zwei Nachkommastellen gerundet
+    // Berechnung (ignoriert deaktivierte Zeilen komplett)
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
-      for(const g of grades){ const val=parseFloatOrNull(g.value); const w=parseFloat(g.weight)||0; if(val==null) continue; if(val<1||val>6) continue; num+=val*w; den+=w }
+      for(const g of grades){ 
+        if(g.disabled) continue; // Überspringen, wenn deaktiviert
+        const val=parseFloatOrNull(g.value); 
+        const w=parseFloat(g.weight)||0; 
+        if(val==null) continue; 
+        if(val<1||val>6) continue; 
+        num+=val*w; den+=w 
+      }
       if(den===0) return null
       return Math.round((num/den)*100)/100
     }
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
 
-    // Funktion um ALLES komplett frisch durchzurechnen
     function recalculateEverything(){
       subjects.forEach(s => {
         s.avg = calcAverage(s.grades);
       });
-      save(subjects);
-      renderSubjects();
+      save(subjects); renderSubjects();
       if(currentId){
         const currentSub = subjects.find(x => x.id === currentId);
         if(currentSub) showSubject(currentSub);
       }
-      // Falls die Gesamtübersicht gerade offen ist, diese auch aktualisieren
-      if(document.getElementById('overall-view').style.display === 'block'){
-        openOverallView();
-      }
+      if(document.getElementById('overall-view').style.display === 'block'){ openOverallView(); }
     }
 
-    // Event Listener für den Taschenrechner-Button
     document.getElementById('btn-recalculate').addEventListener('click', () => {
       recalculateEverything();
-      // Kleines Feedback für den Nutzer
       alert('Alle Durchschnitte wurden erfolgreich neu berechnet!');
     });
 
@@ -368,9 +397,14 @@
       document.getElementById('overall-view').style.display='block';
       const tbody=document.querySelector('#overall-table tbody'); tbody.innerHTML=''
       let total=0,count=0
+      
       subjects.forEach(s=>{
+        // Zählen, wie viele Noten in diesem Fach aktuell deaktiviert / aus sind
+        const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
+        const inactiveText = inactiveCount > 0 ? `<span class="inactive-count">(Inaktiv: ${inactiveCount}x)</span>` : '';
+        
         const tr=document.createElement('tr')
-        tr.innerHTML=`<td>${escapeHtml(s.name)}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
+        tr.innerHTML=`<td>${escapeHtml(s.name)}${inactiveText}</td><td>${s.avg==null?'–':formatAvg(s.avg)}</td>`
         tbody.appendChild(tr)
         if(s.avg!=null){ total+=s.avg; count++ }
       })
@@ -405,8 +439,9 @@
             s.grades.forEach((g,i)=>{
               const val = parseFloatOrNull(g.value)
               const w   = parseFloat(g.weight)||0
-              const contrib = (val!=null && val>=1 && val<=6) ? (val*w).toFixed(2) : '--'
-              txt += '  Note ' + (i+1) + ': ' + (val!=null?val:'--') + ' [Gewichtung: ' + w + '] (Beitrag: ' + contrib + ')\n'
+              const statusStr = g.disabled ? ' [DEAKTIVIERT/AUS]' : '';
+              const contrib = (val!=null && val>=1 && val<=6 && !g.disabled) ? (val*w).toFixed(2) : '--'
+              txt += '  Note ' + (i+1) + ': ' + (val!=null?val:'--') + ' [Gewichtung: ' + w + '] (Beitrag: ' + contrib + ')' + statusStr + '\n'
             })
           }
           txt += '\n'
@@ -415,13 +450,15 @@
         txt += '========================================\n'
         txt += 'GESAMTUEBERSICHT\n'
         txt += '========================================\n'
-        let total=0,count=0
         subjects.forEach(s=>{
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          txt += s.name + ': ' + avgStr + '\n'
-          if(s.avg!=null){ total+=s.avg; count++ }
+          const inactiveCount = s.grades ? s.grades.filter(g => g.disabled).length : 0;
+          const inactiveStr = inactiveCount > 0 ? ` (Inaktiv: ${inactiveCount}x)` : '';
+          txt += s.name + inactiveStr + ': ' + avgStr + '\n'
         })
         txt += '----------------------------------------\n'
+        let total=0,count=0
+        subjects.forEach(s=>{ if(s.avg!=null){ total+=s.avg; count++ } })
         const overall = count>0 ? formatAvg(total/count) : '--'
         txt += 'Gesamtdurchschnitt: ' + overall + '\n\n'
         txt += '--- JSON-Daten (nicht bearbeiten) ---\n'
