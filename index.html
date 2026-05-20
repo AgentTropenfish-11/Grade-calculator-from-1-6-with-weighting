@@ -78,7 +78,7 @@
 
     .card-title{font-weight:700;margin-bottom:8px}
     .field{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-    label{min-width:140px;color:var(--muted);font-size:14px}
+    label{min-width:160px;color:var(--muted);font-size:14px}
     input[type="text"],select,input[type="number"]{padding:8px;border-radius:8px;border:1px solid var(--border);min-width:120px;background:var(--card);color:var(--text)}
     .small{font-size:13px;color:var(--muted)}
 
@@ -88,15 +88,14 @@
     .grade-row.disabled { opacity: 0.35; }
     .grade-row.disabled input, .grade-row.disabled select { background: var(--bg); color: var(--muted); }
     
-    .grade-row input, .grade-row select.grade-select {width:100px; box-sizing:border-box;}
+    .grade-row input {width:100px; box-sizing:border-box;}
     .grade-row select{width:120px}
 
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
     .inactive-count { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal; }
 
-    /* Untere Leiste: Links das Zahnrad, Rechts die restlichen Steuerelemente */
-    .bottom-bar{margin-top:32px;display:flex;justify-content:space-between;align-items:center}
-    .bottom-controls{display:flex;gap:8px;align-items:center}
+    /* Untere Leiste: Komplett rechtsbündig und auf exakt gleicher Höhe */
+    .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
     /* modal */
     .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:100}
@@ -111,8 +110,7 @@
       .layout{grid-template-columns:1fr} 
       .top{flex-direction:column;align-items:flex-start}
       .controls-top{width:100%;display:flex;flex-wrap:wrap;gap:8px}
-      .bottom-bar{flex-direction:column;gap:16px;align-items:flex-start}
-      .bottom-controls{width:100%;justify-content:flex-end}
+      .bottom-controls{justify-content:flex-end;margin-top:24px;flex-wrap:wrap}
     }
   </style>
 </head>
@@ -198,29 +196,25 @@
       </div>
     </div>
 
-    <div class="bottom-bar">
-      <div>
-        <button class="btn ghost icon-only" id="btn-settings" title="Einstellungen">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </button>
-      </div>
+    <div class="bottom-controls">
+      <button class="btn ghost icon-only" id="btn-settings" title="Einstellungen">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
 
-      <div class="bottom-controls">
-        <button class="btn ghost icon-only" id="btn-recalculate" title="Alle Noten neu berechnen">
-          <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="18" x2="12" y2="18"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
-        </button>
+      <button class="btn ghost icon-only" id="btn-recalculate" title="Alle Noten neu berechnen">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="18" x2="12" y2="18"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
+      </button>
 
-        <button class="btn ghost" id="btn-export">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Export
-        </button>
-        
-        <button class="btn ghost" id="btn-trigger-import">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          Import
-        </button>
-        <input type="file" id="btn-import" accept=".txt" style="display:none"/>
-      </div>
+      <button class="btn ghost" id="btn-export">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Export
+      </button>
+      
+      <button class="btn ghost" id="btn-trigger-import">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        Import
+      </button>
+      <input type="file" id="btn-import" accept=".txt" style="display:none"/>
     </div>
   </div>
 
@@ -245,13 +239,6 @@
       <div class="modal">
         <div class="card-title">Einstellungen</div>
         <div style="margin-top:12px">
-          <div class="field">
-            <label>Noten Eingabe-Typ:</label>
-            <select id="setting-input-type">
-              <option value="input">Tippen (Zahlenfeld)</option>
-              <option value="select">Dropdown (Auswahl)</option>
-            </select>
-          </div>
           <div class="field">
             <label>Design-Modus:</label>
             <select id="setting-theme">
@@ -282,7 +269,7 @@
     function save(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)) }
 
     // Standard-Einstellungen laden
-    let config = { inputType: 'input', theme: 'light', tempGrades: true };
+    let config = { theme: 'light', tempGrades: true };
     try {
       const rawConfig = localStorage.getItem(SETTINGS_KEY);
       if(rawConfig) config = {...config, ...JSON.parse(rawConfig)};
@@ -392,32 +379,8 @@
         const row=document.createElement('div'); 
         row.className='grade-row' + (g.disabled && config.tempGrades ? ' disabled' : '');
         
-        let inNum;
-        if(config.inputType === 'select') {
-          // Dropdown für Noten (1,0 bis 6,0 in 0,1-Schritten)
-          inNum = document.createElement('select');
-          inNum.className = 'grade-select';
-          const emptyOpt = document.createElement('option');
-          emptyOpt.value = ''; emptyOpt.textContent = '--';
-          inNum.appendChild(emptyOpt);
-          
-          for(let val=1.0; val<=6.0.toFixed(1); val=(parseFloat(val)+0.1).toFixed(1)){
-            const o = document.createElement('option');
-            o.value = val; o.textContent = val.replace('.',',');
-            
-            // Vergleicht Gleitkommazahlen sauber gerundet, um Übereinstimmung zu garantieren
-            if(g.value !== null && parseFloat(g.value).toFixed(1) === val) {
-              o.selected = true;
-            }
-            inNum.appendChild(o);
-          }
-          inNum.addEventListener('change',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
-        } else {
-          // Traditionelles Zahlenfeld zum Tippen
-          inNum = document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
-          inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
-        }
-        
+        const inNum = document.createElement('input'); inNum.type='number'; inNum.step='0.1'; inNum.min='1'; inNum.max='6'; inNum.value=g.value
+        inNum.addEventListener('input',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
         inNum.disabled = !!(g.disabled && config.tempGrades);
         
         const sel=document.createElement('select'); [0.5,1,1.5,2].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w; if(w==g.weight) o.selected=true; sel.appendChild(o) })
@@ -460,16 +423,13 @@
       const tpl = document.getElementById('settings-modal-tpl').content.cloneNode(true);
       const back = tpl.querySelector('.modal-back');
       
-      const selectType = back.querySelector('#setting-input-type');
       const selectTheme = back.querySelector('#setting-theme');
       const selectTemp = back.querySelector('#setting-temp-grades');
       
-      selectType.value = config.inputType;
       selectTheme.value = config.theme;
       selectTemp.value = config.tempGrades ? 'true' : 'false';
       
       back.querySelector('#settings-save').addEventListener('click', () => {
-        config.inputType = selectType.value;
         config.theme = selectTheme.value;
         config.tempGrades = selectTemp.value === 'true';
         
