@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de')">
+<html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -12,7 +12,6 @@
     h1{margin:0 0 12px;font-size:20px}
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     
-    /* Einheitliche Button-Formatierung */
     .btn {
       background:#111;
       color:#fff;
@@ -32,7 +31,6 @@
     }
     .btn.ghost{background:transparent;color:#111;border:1px solid #ddd}
     
-    /* Quadratischer Button für das Recalculate-Icon */
     .btn.icon-only {
       padding:8px;
       width:38px;
@@ -52,7 +50,6 @@
     .controls{display:flex;gap:6px;align-items:center;flex-shrink:0}
     .icon-btn{background:transparent;border:0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:#444}
     
-    /* SVG Icon-Styling */
     .btn svg, .icon-btn svg {width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
     .card-title{font-weight:700;margin-bottom:8px}
@@ -64,7 +61,7 @@
     .grade-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
     .grade-row{display:flex;gap:8px;align-items:center;transition:opacity 0.2s}
     
-    /* Zustand für ausgegraute Zeilen */
+    /* Zustand für temporär ausgeschaltete/ausgegraute Notenzeilen */
     .grade-row.disabled { opacity: 0.35; }
     .grade-row.disabled input, .grade-row.disabled select { background: #f0f0f0; color: #888; }
     
@@ -73,11 +70,8 @@
 
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
 
-    /* Ausgegrauter ungewichteter Text */
-    .unweighted-text { color: var(--muted); font-weight: normal; font-size: 14px; margin-left: 8px; opacity: 0.75; }
     .inactive-count { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal; }
 
-    /* Unten RECHTS platzierte Steuerung */
     .bottom-controls{margin-top:32px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
     /* modal */
@@ -156,7 +150,7 @@
                 </button>
               </div>
               <div style="margin-top:12px;font-weight:700">
-                Durchschnitt: <span id="calc-result">–</span><span id="unweighted-result" class="unweighted-text"></span>
+                Durchschnitt: <span id="calc-result">–</span>
               </div>
             </div>
           </div>
@@ -302,19 +296,11 @@
       showSubject(s)
     }
     function showSubject(s){
-      const unweighted = calcUnweightedAverage(s.grades);
       document.getElementById('sub-name').textContent=s.name
       document.getElementById('sub-name').style.color=s.color
       document.getElementById('sub-avg').textContent='Durchschnitt: '+(s.avg==null?'–':formatAvg(s.avg))
       document.getElementById('calc-result').textContent=(s.avg==null?'–':formatAvg(s.avg))
       
-      const unweightedEl = document.getElementById('unweighted-result');
-      if (unweighted != null) {
-        unweightedEl.textContent = `(Ungewichtet: ${formatAvg(unweighted)})`;
-      } else {
-        unweightedEl.textContent = '';
-      }
-
       renderGradeRows(s)
       renderSubjects()
     }
@@ -360,11 +346,12 @@
     document.getElementById('btn-overall').addEventListener('click',()=>{ openOverallView() })
     document.getElementById('btn-overall-back').addEventListener('click',()=>{ document.getElementById('overall-view').style.display='none'; document.getElementById('welcome').style.display='block' })
 
+    // Berechnet den Schnitt unter Berücksichtigung der eingestellten individuellen Gewichtungen
     function calcAverage(grades){
       if(!grades||grades.length===0) return null
       let num=0,den=0
       for(const g of grades){ 
-        if(g.disabled) continue; 
+        if(g.disabled) continue; // Überspringt temporär ausgeschaltete Zeilen
         const val=parseFloatOrNull(g.value); 
         const w=parseFloat(g.weight)||0; 
         if(val==null) continue; 
@@ -373,20 +360,6 @@
       }
       if(den===0) return null
       return Math.round((num/den)*100)/100
-    }
-
-    function calcUnweightedAverage(grades){
-      if(!grades||grades.length===0) return null
-      let sum=0, count=0
-      for(const g of grades){
-        if(g.disabled) continue; 
-        const val=parseFloatOrNull(g.value);
-        if(val==null || val<1 || val>6) continue;
-        sum+=val;
-        count++;
-      }
-      if(count===0) return null
-      return Math.round((sum/count)*100)/100
     }
 
     function updateAvgForSubject(s){ const r=calcAverage(s.grades); s.avg=r; save(subjects); renderSubjects(); if(currentId===s.id) showSubject(s) }
@@ -446,9 +419,7 @@
         subjects.forEach((s,si)=>{
           txt += 'Fach: ' + s.name + '\n'
           const avgStr = s.avg==null ? '--' : formatAvg(s.avg)
-          const unweighted = calcUnweightedAverage(s.grades)
-          const unweightedStr = unweighted==null ? '--' : formatAvg(unweighted)
-          txt += 'Durchschnitt: ' + avgStr + ' (Ungewichtet: ' + unweightedStr + ')\n'
+          txt += 'Durchschnitt: ' + avgStr + '\n'
           txt += '----------------------------------------\n'
           if(!s.grades || s.grades.length===0){
             txt += '  (keine Noten eingetragen)\n'
