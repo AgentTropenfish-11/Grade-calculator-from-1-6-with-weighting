@@ -94,7 +94,7 @@
     .empty{color:var(--muted);padding:16px;border-radius:8px;text-align:center}
     .inactive-count { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: normal; }
 
-    /* Steuerung unten geteilt (links Zahnrad, rechts Export/Import/Rechner) */
+    /* Untere Leiste: Links das Zahnrad, Rechts die restlichen Steuerelemente */
     .bottom-bar{margin-top:32px;display:flex;justify-content:space-between;align-items:center}
     .bottom-controls{display:flex;gap:8px;align-items:center}
 
@@ -111,7 +111,8 @@
       .layout{grid-template-columns:1fr} 
       .top{flex-direction:column;align-items:flex-start}
       .controls-top{width:100%;display:flex;flex-wrap:wrap;gap:8px}
-      .bottom-bar{flex-direction:column;gap:16px;align-items:flex-end}
+      .bottom-bar{flex-direction:column;gap:16px;align-items:flex-start}
+      .bottom-controls{width:100%;justify-content:flex-end}
     }
   </style>
 </head>
@@ -399,10 +400,15 @@
           const emptyOpt = document.createElement('option');
           emptyOpt.value = ''; emptyOpt.textContent = '--';
           inNum.appendChild(emptyOpt);
+          
           for(let val=1.0; val<=6.0.toFixed(1); val=(parseFloat(val)+0.1).toFixed(1)){
             const o = document.createElement('option');
             o.value = val; o.textContent = val.replace('.',',');
-            if(g.value !== null && parseFloat(g.value).toFixed(1) === val) o.selected = true;
+            
+            // Vergleicht Gleitkommazahlen sauber gerundet, um Übereinstimmung zu garantieren
+            if(g.value !== null && parseFloat(g.value).toFixed(1) === val) {
+              o.selected = true;
+            }
             inNum.appendChild(o);
           }
           inNum.addEventListener('change',()=>{ s.grades[idx].value=parseFloatOrNull(inNum.value); updateAvgForSubject(s) })
@@ -421,7 +427,6 @@
         row.appendChild(inNum); 
         row.appendChild(sel);
         
-        // Auge-Button nur rendern, wenn in Einstellungen aktiviert
         if(config.tempGrades) {
           const toggleBtn=document.createElement('button'); toggleBtn.className='icon-btn';
           toggleBtn.innerHTML = g.disabled ? iconEyeClosed : iconEyeOpen;
